@@ -78,6 +78,13 @@ def main():
         
         print("\nExperiment completed successfully!")
         
+    except ImportError as e:
+        print(f"\nImport error: {e}")
+        print("Make sure exptools2 is installed: pip install -r requirements.txt")
+        raise
+    except KeyboardInterrupt:
+        print("\nExperiment interrupted by user.")
+        raise
     except Exception as e:
         print(f"\nError running experiment: {e}")
         raise

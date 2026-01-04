@@ -59,6 +59,10 @@ class ExtinctionTrial(Trial):
     
     def draw(self):
         """Draw the current phase of the trial."""
+        # Bounds checking to prevent IndexError
+        if self.current_phase_index >= len(self.phase_names):
+            return
+        
         phase = self.phase_names[self.current_phase_index]
         
         if phase == 'fixation':

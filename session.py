@@ -42,7 +42,10 @@ class ExtinctionSession(Session):
         
         for trial_nr in range(self.n_trials):
             # Define phases for each trial
-            phase_durations = [0.5, 1.0, 0.5]  # fixation, stimulus, response
+            # Using instance variables for flexibility
+            fixation_dur = 0.5
+            response_dur = 0.5
+            phase_durations = [fixation_dur, self.trial_duration, response_dur]
             phase_names = ['fixation', 'stimulus', 'response']
             
             # Create trial-specific parameters
