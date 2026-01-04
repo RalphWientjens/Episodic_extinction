@@ -1,0 +1,117 @@
+"""
+Session class for Episodic Extinction experiment.
+"""
+
+from exptools2.core import Session
+from trial import ExtinctionTrial
+import numpy as np
+from psychopy.visual import TextStim
+
+
+class ExtinctionSession(Session):
+    """
+    Session class for the Episodic Extinction experiment.
+    
+    Manages the experimental session including trial sequence,
+    instructions, and data collection.
+    """
+    
+    def __init__(self, output_str, output_dir=None, settings_file=None):
+        """
+        Initialize ExtinctionSession.
+        
+        Parameters
+        ----------
+        output_str : str
+            Basename for output files
+        output_dir : str, optional
+            Directory for output files
+        settings_file : str, optional
+            Path to settings file
+        """
+        super().__init__(output_str, output_dir=output_dir, 
+                        settings_file=settings_file)
+        
+        # Experiment-specific parameters
+        # Can be overridden by settings file
+        if hasattr(self, 'settings') and 'experiment' in self.settings:
+            self.n_trials = self.settings['experiment'].get('n_trials', 10)
+            self.trial_duration = self.settings['experiment'].get('trial_duration', 2.0)
+        else:
+            self.n_trials = 10  # Default number of trials
+            self.trial_duration = 2.0  # seconds
+        
+    def create_trials(self):
+        """Create trial list for the session."""
+        self.trials = []
+        
+        for trial_nr in range(self.n_trials):
+            # Define phases for each trial
+            # Using instance variables for flexibility
+            fixation_dur = 0.5
+            response_dur = 0.5
+            phase_durations = [fixation_dur, self.trial_duration, response_dur]
+            phase_names = ['fixation', 'stimulus', 'response']
+            
+            # Create trial-specific parameters
+            parameters = {
+                'trial_nr': trial_nr,
+                'stimulus_text': f'Trial {trial_nr + 1}',
+                'condition': 'extinction' if trial_nr % 2 == 0 else 'control'
+            }
+            
+            # Create trial
+            trial = ExtinctionTrial(
+                session=self,
+                trial_nr=trial_nr,
+                phase_durations=phase_durations,
+                phase_names=phase_names,
+                parameters=parameters,
+                timing='seconds',
+                verbose=True
+            )
+            
+            self.trials.append(trial)
+    
+    def run(self):
+        """Run the experimental session."""
+        # Display instructions
+        self.display_instructions()
+        
+        # Create trials
+        self.create_trials()
+        
+        # Start experiment
+        self.start_experiment()
+        
+        # Run all trials
+        for trial in self.trials:
+            trial.run()
+        
+        # End experiment
+        self.close()
+    
+    def display_instructions(self):
+        """Display instruction screen."""
+        instruction_text = """
+        Welcome to the Episodic Extinction Experiment
+        
+        You will see a series of stimuli on the screen.
+        Please respond as instructed.
+        
+        Press any key to continue...
+        """
+        
+        instruction_stim = TextStim(
+            self.win,
+            text=instruction_text,
+            height=0.1,
+            wrapWidth=1.5,
+            color='white'
+        )
+        
+        instruction_stim.draw()
+        self.win.flip()
+        
+        # Wait for key press
+        self.win.waitKeys()
