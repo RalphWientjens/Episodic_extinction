@@ -61,6 +61,9 @@ class ExtinctionTrial(Trial):
         """Draw the current phase of the trial."""
         # Bounds checking to prevent IndexError
         if self.current_phase_index >= len(self.phase_names):
+            if self.verbose:
+                print(f"Warning: phase index {self.current_phase_index} exceeds "
+                      f"number of phases {len(self.phase_names)}")
             return
         
         phase = self.phase_names[self.current_phase_index]

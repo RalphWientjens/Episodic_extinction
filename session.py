@@ -33,8 +33,13 @@ class ExtinctionSession(Session):
                         settings_file=settings_file)
         
         # Experiment-specific parameters
-        self.n_trials = 10  # Default number of trials
-        self.trial_duration = 2.0  # seconds
+        # Can be overridden by settings file
+        if hasattr(self, 'settings') and 'experiment' in self.settings:
+            self.n_trials = self.settings['experiment'].get('n_trials', 10)
+            self.trial_duration = self.settings['experiment'].get('trial_duration', 2.0)
+        else:
+            self.n_trials = 10  # Default number of trials
+            self.trial_duration = 2.0  # seconds
         
     def create_trials(self):
         """Create trial list for the session."""
