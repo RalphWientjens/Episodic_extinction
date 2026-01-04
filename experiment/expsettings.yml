@@ -1,0 +1,42 @@
+preferences:
+    general:
+        audioLib: SoundDevice
+        units: deg
+
+window:
+    size: [1024, 576] 
+    pos: [0, 0] 
+    color: [0, 0, 0]
+    fullscr: False
+    winType: pyglet
+    waitBlanking: True
+    viewScale: [1,1] #This parameter is added, if scaling is desired, it can be performed here, this is not yet applied to the bar-positions in the runs notebook. If scaled to a smaller window, this will result in less bars presented 
+    allowStencil: True #This parameter is also added, necessary for the square aperture
+    units: pix
+
+monitor:
+    name: default
+    width: 69.8  # in cm
+    distance: 194  # in cm, Should be ensured it is correct in the scanner
+    gamma: 2.1
+
+operating system: 'mac' # specify the OS the code is run on as 'mac', 'linux', or 'windows'
+
+mouse:
+    visible: True
+
+# eyetracker:
+#     model: eyelink
+
+# mri:
+#     TR: 1.6  # seconds between volume acquisitions
+#     topup_scan: False 
+#     topup_duration: 45 # topup scan duration in seconds (no 't's)
+
+#     #only relevant for scanning simulations
+#     simulate: True #set this to true to simulate a virtual scanner   
+#     TA: 1.5  # seconds to acquire one volume
+#     volumes: 100  # number of 3D volumes to obtain in a given scanning run
+#     sync: t  # character used as flag for simulation sync timing, default=‘5’
+#     skip: 0  # how many frames to silently omit initially during T1 stabilization, no sync pulse.
+#     sound: False  # simulate scanner noise

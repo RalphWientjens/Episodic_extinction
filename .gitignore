@@ -35,6 +35,9 @@ data/
 logs/
 *.log
 
+# Stimuli files, large media, and outputs
+stimuli_files/
+
 # OS
 .DS_Store
 Thumbs.db

@@ -6,10 +6,13 @@ Created on Sun Jan 4th 12:00:00 2026
 Session class for Episodic Extinction experiment.
 """
 
+from exptools2.core import PylinkEyetrackerSession
 from exptools2.core import Session
 from trial import ExtinctionTrial
 import numpy as np
-from psychopy.visual import TextStim
+from psychopy import visual
+import os
+import sys
 
 
 class ExtinctionSession(Session):
@@ -20,7 +23,7 @@ class ExtinctionSession(Session):
     instructions, and data collection.
     """
     
-    def __init__(self, output_str, output_dir=None, settings_file=None):
+    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml"):
         """
         Initialize ExtinctionSession.
         
@@ -39,11 +42,10 @@ class ExtinctionSession(Session):
         # Experiment-specific parameters
         # Can be overridden by settings file
         if hasattr(self, 'settings') and 'experiment' in self.settings:
-            self.n_trials = self.settings['experiment'].get('n_trials', 10)
-            self.trial_duration = self.settings['experiment'].get('trial_duration', 2.0)
+            self.n_trials = self.settings['experiment'].get('n_trials', 2)
+            self.trial_duration = self.settings['experiment'].get('trial_duration', 17.0)
         else:
-            self.n_trials = 10  # Default number of trials
-            self.trial_duration = 2.0  # seconds
+            self.n_trials = 2  # Default number of trials
         
     def create_trials(self):
         """Create trial list for the session."""
@@ -52,35 +54,47 @@ class ExtinctionSession(Session):
         for trial_nr in range(self.n_trials):
             # Define phases for each trial
             # Using instance variables for flexibility
-            fixation_dur = 0.5
-            response_dur = 0.5
-            phase_durations = [fixation_dur, self.trial_duration, response_dur]
-            phase_names = ['fixation', 'stimulus', 'response']
-            
-            # Create trial-specific parameters
-            parameters = {
-                'trial_nr': trial_nr,
-                'stimulus_text': f'Trial {trial_nr + 1}',
-                'condition': 'extinction' if trial_nr % 2 == 0 else 'control'
-            }
+            phase_durations = [4.0, 4.0, 4.0, 4.0, 1.0]
             
             # Create trial
             trial = ExtinctionTrial(
                 session=self,
                 trial_nr=trial_nr,
                 phase_durations=phase_durations,
-                phase_names=phase_names,
-                parameters=parameters,
-                timing='seconds',
-                verbose=True
+                phase_names=["context", "NS", "CS_distress", "US", "fixcross"]
             )
             
             self.trials.append(trial)
     
+    # def display_instructions(self):
+    #     """Display instruction screen."""
+    #     instruction_text = """
+    #     Welcome to the Episodic Extinction Experiment
+        
+    #     You will see a series of stimuli on the screen.
+    #     Please respond as instructed.
+        
+    #     Press any key to continue...
+    #     """
+        
+    #     instruction_stim = visual.TextStim(
+    #         self.win,
+    #         text=instruction_text,
+    #         height=0.1,
+    #         wrapWidth=1.5,
+    #         color='white'
+    #     )
+        
+    #     instruction_stim.draw()
+    #     self.win.flip()
+        
+    #     # Wait for key press
+    #     self.win.waitKeys()
+
     def run(self):
         """Run the experimental session."""
         # Display instructions
-        self.display_instructions()
+        # self.display_instructions()
         
         # Create trials
         self.create_trials()
@@ -94,28 +108,3 @@ class ExtinctionSession(Session):
         
         # End experiment
         self.close()
-    
-    def display_instructions(self):
-        """Display instruction screen."""
-        instruction_text = """
-        Welcome to the Episodic Extinction Experiment
-        
-        You will see a series of stimuli on the screen.
-        Please respond as instructed.
-        
-        Press any key to continue...
-        """
-        
-        instruction_stim = TextStim(
-            self.win,
-            text=instruction_text,
-            height=0.1,
-            wrapWidth=1.5,
-            color='white'
-        )
-        
-        instruction_stim.draw()
-        self.win.flip()
-        
-        # Wait for key press
-        self.win.waitKeys()
