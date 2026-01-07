@@ -11,6 +11,7 @@ from exptools2.core import Session
 from trial import ExtinctionTrial
 import numpy as np
 from psychopy import visual
+# from psychopy.core import getMouse
 import os
 import sys
 
@@ -54,18 +55,38 @@ class ExtinctionSession(Session):
         for trial_nr in range(self.n_trials):
             # Define phases for each trial
             # Using instance variables for flexibility
-            phase_durations = [4.0, 4.0, 4.0, 4.0, 1.0]
-            
+            phase_durations = [1.0, 3.0, 1.0, 3.0, 4.0, 4.0, 1.0, 1.0]
+            phase_names = ["context", "NS", "context", "CS", "CS_distress", "US", "context", "fixcross"]
             # Create trial
             trial = ExtinctionTrial(
                 session=self,
                 trial_nr=trial_nr,
                 phase_durations=phase_durations,
-                phase_names=["context", "NS", "CS_distress", "US", "fixcross"]
+                phase_names=phase_names
             )
             
             self.trials.append(trial)
     
+
+
+    def run(self):
+        """Run the experimental session."""
+        # Display instructions
+        # self.display_instructions()
+        
+        # Create trials
+        self.create_trials()
+        
+        # Start experiment
+        self.start_experiment()
+        
+        # Run all trials
+        for trial in self.trials:
+            trial.run()
+        
+        # End experiment
+        self.close()
+
     # def display_instructions(self):
     #     """Display instruction screen."""
     #     instruction_text = """
@@ -90,21 +111,3 @@ class ExtinctionSession(Session):
         
     #     # Wait for key press
     #     self.win.waitKeys()
-
-    def run(self):
-        """Run the experimental session."""
-        # Display instructions
-        # self.display_instructions()
-        
-        # Create trials
-        self.create_trials()
-        
-        # Start experiment
-        self.start_experiment()
-        
-        # Run all trials
-        for trial in self.trials:
-            trial.run()
-        
-        # End experiment
-        self.close()
