@@ -4,7 +4,9 @@ preferences:
         units: deg
 
 window:
-    size: [1024, 576] 
+    # size: [1024, 576] # very small screen
+    size: [1536, 864] #medium size
+    # size: [1920, 1080] #fullscreen (small monitor)
     pos: [0, 0] 
     color: [0, 0, 0]
     fullscr: False
