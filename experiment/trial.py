@@ -47,9 +47,6 @@ class ExtinctionTrial(Trial):
         verbose : bool
             Print trial information
         """
-        #phase_durations = [4.0, 4.0, 4.0, 4.0, 1.0]
-        phase_names = ["context", "NS", "context", "CS", "CS_distress", "US", "context", "coherence", "fixcross"]
-
         super().__init__(
             session=session,
             trial_nr=trial_nr,
@@ -68,7 +65,7 @@ class ExtinctionTrial(Trial):
         self.context = self.parameters["context"]
         self.NS = self.parameters["NS"]
         self.CS = self.parameters["CS"]
-        self.US = self.parameters["US_image"]
+        self.US = self.parameters["US"]
         self.US_sound_file = self.parameters["US_sound"]
 
         # Images
@@ -170,7 +167,11 @@ class ExtinctionTrial(Trial):
         self.coherence_slider.setValue(self.coherence_value)
         self.coherence_started = False
 
-        self.last_phase = None
+        # self.phase = None  # Initialize phase to avoid AttributeError
+        # self.last_phase = None
+
+        #Set blocks and properties per block if needed
+        self.block = self.parameters['block']
 
     # For logging slider values, used in on_phase_end
     def log_slider(self, value, phase_name=None):
@@ -197,7 +198,10 @@ class ExtinctionTrial(Trial):
 
     def on_phase_start(self, phase):
         """Called when a new phase starts."""
-        self.phase_name = self.phase_names[self.phase]
+        if 0 <= self.phase < len(self.phase_names):
+            self.phase_name = self.phase_names[self.phase]
+        else:
+            raise IndexError(f"Phase index {self.phase} is out of bounds for phase_names.")
 
         if self.phase_name == "CS_distress":
             # Reset slider
@@ -217,27 +221,23 @@ class ExtinctionTrial(Trial):
 
 
     def draw(self):
-        """Draw the current phase."""
-        if self.phase != self.last_phase:
+        if self.last_phase is None or self.phase != self.last_phase:
             self.on_phase_start(self.phase)
             self.last_phase = self.phase
 
         # Draw stimuli based on phase
-        if self.phase == 0:  # context
+        if self.phase_name == "context":  # context
             self.context_img.draw()
 
-        elif self.phase == 1:  # NS
+        elif self.phase_name == "NS":  # NS
             self.context_img.draw()
             self.NS_img.draw()
 
-        elif self.phase == 2:  # context
-            self.context_img.draw()
-
-        elif self.phase == 3:  # CS
+        elif self.phase_name == "CS":  # CS
             self.context_img.draw()
             self.CS_img.draw()
 
-        elif self.phase == 4:  # CS_distress
+        elif self.phase_name == "CS_distress":  # CS_distress
             self.context_img.draw()
             self.CS_img.draw()
             self.distress_box.draw()
@@ -251,14 +251,11 @@ class ExtinctionTrial(Trial):
             if buttons[0] and not self.distress_started:
                 self.distress_started = True
 
-        elif self.phase == 5:  # US
+        elif self.phase_name == "US":  # US
             self.context_img.draw()
             self.US_img.draw()
 
-        elif self.phase == 6:  # context
-            self.context_img.draw()
-
-        elif self.phase == 7:  # Coherence
+        elif self.phase_name == "coherence":  # Coherence
             self.coherence_box.draw()
             self.coherence_text.draw()
             self.coherence_slider.draw()
@@ -270,27 +267,27 @@ class ExtinctionTrial(Trial):
             if buttons[0] and not self.coherence_started:
                 self.coherence_started = True
 
-        elif self.phase == 8:  # fixcross
+        elif self.phase_name == "fixcross":  # fixcross
             self.fixation.draw()
 
     def on_phase_end(self):
         """Called automatically when a phase ends. For fMRI experiment: change slider values to joystick input"""
         # Log slider value at end of distress phase
-        if self.phase == 4:  # CS_distress
+        if self.phase == "CS_distress":  # CS_distress
             self.session.win.flip()  # make sure last mouse events are processed
             distress_rating = self.distress_slider.getRating() 
             if distress_rating is None:
-                distress_rating = self.distress_value  # use last known value if none selected
+                distress_rating = NA  # use NAN if none selected
             print("Distress rating recorded. Rating is the following: ", self.distress_slider.getRating())
-            self.log_slider(value=distress_rating, phase_name='distress_end')
+            self.log_slider(value=distress_rating, phase_name='distress_value')
 
-        elif self.phase == 7:  # Coherence
+        elif self.phase == "coherence":  # Coherence
             self.session.win.flip()  # make sure last mouse events are processed
             coherence_rating = self.coherence_slider.getRating() 
             if coherence_rating is None:
-                coherence_rating = self.coherence_value  # use last known value if none selected
+                coherence_rating = NA  # use NAN if none selected
             print("Coherence rating recorded. Rating is the following: ", self.coherence_slider.getRating())
-            self.log_slider(value=coherence_rating, phase_name='coherence_end')
+            self.log_slider(value=coherence_rating, phase_name='coherence_value')
 
         self.last_phase = None  # reset for next phase
 

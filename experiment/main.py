@@ -15,7 +15,7 @@ datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 def main():
     subject = sys.argv[1]
     sess =  sys.argv[2]
-    # version = sys.argv[3]
+    version = sys.argv[3]
     # eyetracker_on = bool(sys.argv[4])
     
     output_str= subject+'_'+sess
@@ -32,7 +32,8 @@ def main():
         output_str=output_str, 
         output_dir=output_dir, 
         settings_file=settings_file,
-        sess=int(sess)
+        sess=int(sess),
+        version=version
         )
     ts.run()
 

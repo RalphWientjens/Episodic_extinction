@@ -12,9 +12,67 @@ from trial import ExtinctionTrial
 import numpy as np
 import pandas as pd
 from psychopy import visual
+import random
 # from psychopy.core import getMouse
 import os
 import sys
+
+PHASES = {
+    "context":          ("context", 1.0),
+    "NS":               ("NS", 3.0),
+    "CS":               ("CS", 3.0),
+    "CS_only":          ("CS_only", 3.0),
+    "CS_distress":      ("CS_distress", 4.0),
+    "CS_distress_only": ("CS_distress_only", 4.0),
+    "US":               ("US", 4.0),
+    "US_only":          ("US_only", 4.0),
+    "EXT":              ("context", 4.0),
+    "coherence":        ("coherence", 4.0),
+    "reinforced_EXT":   ("fixcross", 4.0),  # duration defined per phase
+    "fixcross":         ("fixcross", random.randint(1,3)),
+    "fixcross_long":    ("fixcross", random.randint(5, 7)),
+}
+
+SESSION_CONFIG = {
+    1: dict(
+        base=["context", "NS", "context", "CS", "CS_distress", "US", "context"],
+        coherence_last_block=True,
+    ),
+
+    2: dict(
+        CC=["context", "CS", "CS_distress", "US", "context"],
+        EXT=["context", "CS", "CS_distress", "EXT", "context"],
+        coherence_last_block=True,
+    ),
+
+    3: dict(
+        reinforced=["CS_only", "CS_distress_only", "US_only"],
+        EXT=["CS_only", "CS_distress_only", "reinforced_EXT"],
+        coherence_last_block=False,
+    ),
+}
+
+def resolve_condition_label(sess: int, condition: int) -> str:
+    """
+    Maps (session, condition integer) to a condition label
+    used in SESSION_CONFIG.
+    """
+
+    if sess == 1:
+        return "base"
+
+    if sess == 2:
+        # uneven → CC, even → EXT
+        return "CC" if condition % 2 == 1 else "EXT"
+
+    if sess == 3:
+        # reinforced if condition == 10 OR uneven
+        if condition == 10 or condition % 2 == 1:
+            return "reinforced"
+        else:
+            return "EXT"
+
+    raise ValueError(f"Unknown session: {sess}")
 
 
 class ExtinctionSession(Session):
@@ -25,7 +83,7 @@ class ExtinctionSession(Session):
     instructions, and data collection.
     """
     
-    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml", sess=1):
+    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml", sess=None, version=None, test_mode=False, blocks=3):
         """
         Initialize ExtinctionSession.
         
@@ -38,10 +96,14 @@ class ExtinctionSession(Session):
         settings_file : str, optional
             Path to settings file
         """
-        super().__init__(output_str, output_dir=output_dir, 
-                        settings_file=settings_file)
+        super().__init__(
+            output_str, 
+            output_dir=output_dir, 
+            settings_file=settings_file)
 
         self.sess = sess  # Store session number
+        self.version = version  # Store version number
+        self.test_mode = test_mode
 
         # blocks per session
         self.session_to_blocks = {
@@ -56,55 +118,84 @@ class ExtinctionSession(Session):
             print(f"Error: Session {self.sess} is not defined. Please provide a valid session number (1, 2, or 3).")
             sys.exit(1)
 
+        #load stimulus set based on version and session
+
+        # stimset_path = os.path.join(
+        #     os.path.dirname(__file__),
+        #     "stimuli_files",
+        #     "stimuli_list_test.tsv"
+        # )
 
         stimset_path = os.path.join(
             os.path.dirname(__file__),
-            "stimuli_files",
-            "stimuli_list_test.tsv"
+            "Stimsets",
+            f"version{self.version}_day{self.sess}.tsv"
         )
 
         self.stimset = pd.read_csv(stimset_path, sep="\t")
-
         self.n_trials = len(self.stimset)
         
-        # Experiment-specific parameters
-        # Can be overridden by settings file
-        if hasattr(self, 'settings') and 'experiment' in self.settings:
-            self.n_trials = self.settings['experiment'].get('n_trials', 2)
-            self.trial_duration = self.settings['experiment'].get('trial_duration', 17.0)
-        else:
-            self.n_trials = 2  # Default number of trials
         
-    def create_trials(self, blocks=3):
+    def get_phases_for_trial(self, condition_label: str, is_last_block: bool):
+        """Get phase names and durations for a trial, based off the session and condition."""
+        cfg = SESSION_CONFIG[self.sess]
+
+        base_phases = cfg[condition_label].copy()
+
+        if is_last_block and cfg.get("coherence_last_block", False):
+            base_phases.append("coherence")
+            base_phases.append("fixcross")
+
+        else: 
+            base_phases.append("fixcross_long")
+
+        phase_names = []
+        phase_durations = []
+
+        for phase_key in base_phases:
+            draw_name, duration = PHASES[phase_key]
+
+            if isinstance(duration, tuple):
+                duration = random.uniform(*duration)
+
+            phase_names.append(phase_key)
+            phase_durations.append(duration)
+
+        return dict(names=phase_names, durations=phase_durations)
+
+        
+    def create_trials(self):
         """Create trial list for the session."""
         self.trials = []
-
-        self.blocks = blocks
         trial_counter = 0
         
-        #Now loop over blocks, for fMRI make unique blocks per run (so no loop needed, just import run number from main)
+        #Now loop over blocks, for fMRI make unique blocks per run (so no loop needed, just import run number from main for each block)
         for block in range(self.blocks):
 
+            is_last_block = (block == self.blocks - 1)
+
             for trial_nr, stim_row in self.stimset.iterrows():
-                
-                # Define phases for each trial
-                # Using instance variables for flexibility
-                phase_durations = [1.0, 3.0, 1.0, 3.0, 4.0, 4.0, 1.0, 4.0, 1.0]
-                phase_names = ["context", "NS", "context", "CS", "CS_distress", "US", "context", "coherence", "fixcross"]
 
                 # declare parameters
                 params = stim_row.to_dict()
                 params['block'] = block + 1
 
-                # Create trial
+                condition_value = int(stim_row["condition"])
+                condition_label = resolve_condition_label(self.sess, condition_value)
+
+                phases = self.get_phases_for_trial(
+                    condition_label=condition_label,
+                    is_last_block=is_last_block
+                )
+
                 trial = ExtinctionTrial(
                     session=self,
+                    phase_names=phases["names"],
+                    phase_durations=phases["durations"],
                     trial_nr=trial_nr,
-                    phase_durations=phase_durations,
-                    phase_names=phase_names,
-                    parameters = params
+                    parameters=params
                 )
-                
+
                 self.trials.append(trial)
                 trial_counter += 1
     
