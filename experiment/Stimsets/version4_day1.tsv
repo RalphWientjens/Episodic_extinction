@@ -1,41 +1,41 @@
-context	NS	CS	US	US_sound	condition	trial	valence
-ContextA42.jpg	A24_lightswitch.jpg	19_bag.jpg	negative_16_foot.jpeg	negative_16_foot.wav	1	1	1
-ContextA28.jpg	A21_cuttingboard.jpg	39_pingpongpaddle.jpg	negative_18_chainsaw.jpeg	negative_18_chainsaw.wav	1	2	1
-ContextA36.jpg	A17_clock01a.jpg	25_headphones.jpg	negative_06_drown.jpeg	negative_06_drown.wav	1	3	1
-ContextA01.jpg	A06_birdie.jpg	20_racket.jpg	negative_14_hook.jpeg	negative_14_hook.wav	1	4	1
-ContextA20.jpg	A15_chalkboarderaser01.jpg	28_bulb.jpg	negative_01_vomit.jpeg	negative_01_vomit.wav	2	1	1
-ContextA13.jpg	A08_bracelet01.jpg	03_barbecue.jpg	negative_20_cat.jpeg	negative_20_cat.wav	2	2	1
-ContextA53.jpg	A19_comb02a.jpg	17_spaghetti.jpg	negative_03_dog.jpeg	negative_03_dog.wav	2	3	1
-ContextA34.jpg	A33_flask.jpg	36_sandwich.jpg	negative_09_shot.jpeg	negative_09_shot.wav	2	4	1
-ContextA09.jpg	A01_armchair01.jpg	06_guitar.jpg	negative_11_feces.jpeg	negative_11_feces.wav	3	1	1
-ContextA06.jpg	A37_mask.jpg	15_parkbench.jpg	negative_08_car.jpeg	negative_08_car.wav	3	2	1
-ContextA47.jpg	A31_filmnegative.jpg	35_wateringcan.jpg	negative_07_abuse.jpeg	negative_07_abuse.wav	3	3	1
-ContextA23.jpg	A35_makeupbrush.jpg	30_notebook.jpg	negative_15_plane.jpeg	negative_15_plane.wav	3	4	1
-ContextA14.jpg	A10_calculator01.jpg	05_leaf.jpg	negative_02_baby.jpeg	negative_02_baby.wav	4	1	1
-ContextA33.jpg	A30_exercisebench.jpg	37_cup.jpg	negative_17_hanged.jpeg	negative_17_hanged.wav	4	2	1
-ContextA26.jpg	A22_dice05a.jpg	23_coffeepot.jpg	negative_05_surgery.jpeg	negative_05_surgery.wav	4	3	1
-ContextA16.jpg	A20_cooler01.jpg	18_binoculars.jpg	negative_04_burns.jpeg	negative_04_burns.wav	4	4	1
-ContextA44.jpg	A25_dustpan.jpg	27_basket.jpg	negative_13_mouth.jpeg	negative_13_mouth.wav	5	1	1
-ContextA22.jpg	A05_bikehelmet.jpg	04_beer.jpg	negative_10_leg.jpeg	negative_10_leg.wav	5	2	1
-ContextA43.jpg	A39_glasses01a.jpg	40_toiletpaper.jpg	negative_12_eye.jpeg	negative_12_eye.wav	5	3	1
-ContextA10.jpg	A36_fryingpan02a.jpg	12_goose.jpg	negative_19_whip.jpeg	negative_19_whip.wav	5	4	1
-ContextA27.jpg	A13_cardboardbox.jpg	29_magnifier.jpg	neutral_14_pulley.jpeg	neutral_14_pulley.wav	6	1	2
-ContextA56.jpg	A14_chalkboard01.jpg	11_teddy.jpg	neutral_07_student.jpeg	neutral_07_student.wav	6	2	2
-ContextA32.jpg	A11_camera03a.jpg	32_printer.jpg	neutral_09_forrest.jpeg	neutral_09_forrest.wav	6	3	2
-ContextA54.jpg	A29_envelope03a.jpg	10_compass.jpg	neutral_05_shave.jpeg	neutral_05_shave.wav	6	4	2
-ContextA25.jpg	A27_egg01a.jpg	24_mouse.jpg	neutral_13_toothbrush.jpeg	neutral_13_toothbrush.wav	7	1	2
-ContextA30.jpg	A34_flyswatter.jpg	33_speaker.jpg	neutral_12_slice.jpeg	neutral_12_slice.wav	7	2	2
-ContextA08.jpg	A07_boot02b.jpg	01_brush.jpg	neutral_06_swim.jpeg	neutral_06_swim.wav	7	3	2
-ContextA29.jpg	A28_electricrazor.jpg	16_spatula.jpg	neutral_08_car.jpeg	neutral_08_car.wav	7	4	2
-ContextA48.jpg	A16_champagne.jpg	26_lamp.jpg	neutral_11_soup.jpeg	neutral_11_soup.wav	8	1	2
-ContextA35.jpg	A23_dishsoap.jpg	13_rollator.jpg	neutral_10_walk.jpeg	neutral_10_walk.wav	8	2	2
-ContextA18.jpg	A12_candle08b.jpg	02_chain.jpg	neutral_18_hammer.jpeg	neutral_18_hammer.wav	8	3	2
-ContextA11.jpg	A09_branch02.jpg	14_workbench.jpg	neutral_16_cheese.jpeg	neutral_16_cheese.wav	8	4	2
-ContextA15.jpg	A26_dvdcase02b.jpg	31_pen.jpg	neutral_03_dog.jpeg	neutral_03_dog.wav	9	1	2
-ContextA38.jpg	A03_banana01.jpg	07_tree.jpg	neutral_04_lighter.jpeg	neutral_04_lighter.wav	9	2	2
-ContextA03.jpg	A04_baseball01b.jpg	22_clothespin.jpg	neutral_01_egg.jpeg	neutral_01_egg.wav	9	3	2
-ContextA02.jpg	A02_avocado02.jpg	21_bowl.jpg	neutral_20_cat.jpeg	neutral_20_cat.wav	9	4	2
-ContextA46.jpg	A40_globe.jpg	38_watch.jpg	neutral_17_bike.jpeg	neutral_17_bike.wav	10	1	2
-ContextA49.jpg	A32_flashlight02b.jpg	09_woodencrate.jpg	neutral_19_market.jpeg	neutral_19_market.wav	10	2	2
-ContextA41.jpg	A18_coin01b.jpg	08_gem.jpg	neutral_02_baby.jpeg	neutral_02_baby.wav	10	3	2
-ContextA04.jpg	A38_garlic01a.jpg	34_umbrella.jpg	neutral_15_plane.jpeg	neutral_15_plane.wav	10	4	2
+context	NS	CS	US	US_sound	condition	trial	valence	epsiode_nr
+ContextA54.png	A10_calculator01.png	27_basket.png	negative_17_hanged.png	negative_17_hanged.wav	1	1	1	1
+ContextA48.png	A33_flask.png	33_speaker.png	negative_19_whip.png	negative_19_whip.wav	1	2	1	2
+ContextA05.png	A13_cardboardbox.png	31_pen.png	negative_14_hook.png	negative_14_hook.wav	1	3	1	3
+ContextA26.png	A03_banana01.png	20_racket.png	negative_02_baby.png	negative_02_baby.wav	1	4	1	4
+ContextA18.png	A18_coin01b.png	05_leaf.png	negative_11_feces.png	negative_11_feces.wav	2	1	1	5
+ContextA38.png	A28_electricrazor.png	21_bowl.png	negative_15_plane.png	negative_15_plane.wav	2	2	1	6
+ContextA06.png	A07_boot02b.png	32_printer.png	negative_01_vomit.png	negative_01_vomit.wav	2	3	1	7
+ContextA47.png	A11_camera03a.png	26_lamp.png	negative_06_drown.png	negative_06_drown.wav	2	4	1	8
+ContextA35.png	A16_champagne.png	22_clothespin.png	negative_03_dog.png	negative_03_dog.wav	3	1	1	9
+ContextA12.png	A19_comb02a.png	04_beer.png	negative_08_car.png	negative_08_car.wav	3	2	1	10
+ContextA15.png	A32_flashlight02b.png	02_chain.png	negative_16_foot.png	negative_16_foot.wav	3	3	1	11
+ContextA27.png	A06_birdie.png	08_gem.png	negative_09_shot.png	negative_09_shot.wav	3	4	1	12
+ContextA36.png	A31_filmnegative.png	30_notebook.png	negative_20_cat.png	negative_20_cat.wav	4	1	1	13
+ContextA03.png	A38_garlic01a.png	16_spatula.png	negative_04_burns.png	negative_04_burns.wav	4	2	1	14
+ContextA10.png	A23_dishsoap.png	39_pingpongpaddle.png	negative_10_leg.png	negative_10_leg.wav	4	3	1	15
+ContextA40.png	A30_exercisebench.png	10_compass.png	negative_18_chainsaw.png	negative_18_chainsaw.wav	4	4	1	16
+ContextA11.png	A25_dustpan.png	37_cup.png	negative_13_mouth.png	negative_13_mouth.wav	5	1	1	17
+ContextA43.png	A34_flyswatter.png	14_workbench.png	negative_07_abuse.png	negative_07_abuse.wav	5	2	1	18
+ContextA51.png	A02_avocado02.png	25_headphones.png	negative_05_surgery.png	negative_05_surgery.wav	5	3	1	19
+ContextA16.png	A04_baseball01b.png	34_umbrella.png	negative_12_eye.png	negative_12_eye.wav	5	4	1	20
+ContextA07.png	A26_dvdcase02b.png	01_brush.png	neutral_12_slice.png	neutral_12_slice.wav	6	1	2	21
+ContextA33.png	A35_makeupbrush.png	36_sandwich.png	neutral_16_cheese.png	neutral_16_cheese.wav	6	2	2	22
+ContextA31.png	A05_bikehelmet.png	09_woodencrate.png	neutral_05_shave.png	neutral_05_shave.wav	6	3	2	23
+ContextA56.png	A24_lightswitch.png	03_barbecue.png	neutral_19_market.png	neutral_19_market.wav	6	4	2	24
+ContextA17.png	A29_envelope03a.png	28_bulb.png	neutral_01_egg.png	neutral_01_egg.wav	7	1	2	25
+ContextA37.png	A17_clock01a.png	24_mouse.png	neutral_08_car.png	neutral_08_car.wav	7	2	2	26
+ContextA49.png	A12_candle08b.png	18_binoculars.png	neutral_03_dog.png	neutral_03_dog.wav	7	3	2	27
+ContextA25.png	A01_armchair01.png	12_goose.png	neutral_18_hammer.png	neutral_18_hammer.wav	7	4	2	28
+ContextA42.png	A22_dice05a.png	29_magnifier.png	neutral_04_lighter.png	neutral_04_lighter.wav	8	1	2	29
+ContextA13.png	A09_branch02.png	35_wateringcan.png	neutral_11_soup.png	neutral_11_soup.wav	8	2	2	30
+ContextA29.png	A20_cooler01.png	19_bag.png	neutral_20_cat.png	neutral_20_cat.wav	8	3	2	31
+ContextA21.png	A21_cuttingboard.png	07_tree.png	neutral_10_walk.png	neutral_10_walk.wav	8	4	2	32
+ContextA41.png	A08_bracelet01.png	13_rollator.png	neutral_07_student.png	neutral_07_student.wav	9	1	2	33
+ContextA39.png	A36_fryingpan02a.png	11_teddy.png	neutral_13_toothbrush.png	neutral_13_toothbrush.wav	9	2	2	34
+ContextA28.png	A39_glasses01a.png	06_guitar.png	neutral_15_plane.png	neutral_15_plane.wav	9	3	2	35
+ContextA52.png	A37_mask.png	17_spaghetti.png	neutral_06_swim.png	neutral_06_swim.wav	9	4	2	36
+ContextA20.png	A15_chalkboarderaser01.png	23_coffeepot.png	neutral_09_forrest.png	neutral_09_forrest.wav	10	1	2	37
+ContextA32.png	A14_chalkboard01.png	15_parkbench.png	neutral_17_bike.png	neutral_17_bike.wav	10	2	2	38
+ContextA01.png	A40_globe.png	40_toiletpaper.png	neutral_02_baby.png	neutral_02_baby.wav	10	3	2	39
+ContextA46.png	A27_egg01a.png	38_watch.png	neutral_14_pulley.png	neutral_14_pulley.wav	10	4	2	40

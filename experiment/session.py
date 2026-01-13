@@ -126,7 +126,7 @@ class ExtinctionSession(Session):
     instructions, and data collection.
     """
     
-    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml", sess=None, version=None, test_mode=False, blocks=3):
+    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml", sess=None, version=None, test_mode=True, blocks=3):
         """
         Initialize ExtinctionSession.
         
@@ -162,6 +162,14 @@ class ExtinctionSession(Session):
             sys.exit(1)
 
         #load stimulus set based on version and session
+        #load day 1 practice stimset, to be done prior to start of session 1
+        practice_stimset_path = os.path.join(
+            os.path.dirname(__file__),
+            "Practice_stimsets",
+            f"day1_practice_stimset.tsv"
+        )
+        self.practice_stimset = pd.read_csv(practice_stimset_path, sep="\t")
+        practice_phase_names = ["context", "NS", "context", "CS", "CS_distress", "US", "context", "coherence", "fixcross"]
 
         # stimset_path = os.path.join(
         #     os.path.dirname(__file__),
@@ -210,12 +218,48 @@ class ExtinctionSession(Session):
 
         return dict(names=phase_names, durations=phase_durations)
 
+    def create_practice_trials(self):
+        """Create practice trials for session 1 only."""
+        practice_trials = []
+
+        # practice uses last-block phase structure
+        for trial_nr, stim_row in self.practice_stimset.iterrows():
+
+            params = stim_row.to_dict()
+            params["block"] = 0
+            params["practice"] = True
+
+            condition_value = int(stim_row["condition"])
+            condition_label = resolve_condition_label(self.sess, condition_value)
+
+            phases = self.get_phases_for_trial(
+                condition_label=condition_label,
+                is_last_block=True,   # ← KEY LINE
+            )
+
+            trial = ExtinctionTrial(
+                session=self,
+                phase_names=phases["names"],
+                phase_durations=phases["durations"],
+                trial_nr=trial_nr,
+                parameters=params,
+            )
+
+            practice_trials.append(trial)
+
+        return practice_trials
+
         
     def create_trials(self):
         """Create trial list for the session."""
         self.trials = []
         trial_counter = 0
         
+        #Add practice trials for session 1
+        if self.sess == 1:
+            practice_trials = self.create_practice_trials()
+            self.trials.extend(practice_trials)
+
         #Now loop over blocks, for fMRI make unique blocks per run (so no loop needed, just import run number from main for each block)
         for block in range(self.blocks):
 
@@ -265,10 +309,25 @@ class ExtinctionSession(Session):
         # Start experiment
         self.start_experiment()
         
-        # Run all trials
+        # --- Run practice trials first (session 1 only) ---
+        if self.sess == 1:
+            for trial in self.trials:
+                if trial.parameters.get("practice", False):
+                    trial.run()
+
+            # ⏸ PAUSE AFTER PRACTICE
+            self.visual.show_text(
+                "End of practice.\n\n"
+                "If you have any questions, ask the experimenter now.\n\n"
+                "Press SPACE to continue."
+            )
+            self.wait_for_keypress("space")
+
+        # --- Run main trials ---
         for trial in self.trials:
-            trial.run()
-        
+            if not trial.parameters.get("practice", False):
+                trial.run()
+
         # End experiment
         self.close()
 

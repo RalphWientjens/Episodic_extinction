@@ -37,6 +37,7 @@ logs/
 
 # Stimuli files, large media, and outputs
 stimuli_files/
+stimulus_files/
 
 # OS
 .DS_Store

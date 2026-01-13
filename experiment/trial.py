@@ -61,7 +61,7 @@ class ExtinctionTrial(Trial):
         self.parameters = parameters or {}
 
         # Stimulus directory
-        stim_dir = os.path.join(os.path.dirname(__file__), "stimuli_files")
+        stim_dir = os.path.join(os.path.dirname(__file__), "stimulus_files")
         self.context = self.parameters["context"]
         self.NS = self.parameters["NS"]
         self.CS = self.parameters["CS"]
@@ -71,22 +71,22 @@ class ExtinctionTrial(Trial):
         # Images
         self.context_img = visual.ImageStim(
             self.session.win,
-            image=os.path.join(stim_dir, "contexts", self.context),
+            image=os.path.join(stim_dir, "contexts_equalized", self.context),
             size=self.session.settings["window"]["size"]
         )
         self.NS_img = visual.ImageStim(
             self.session.win,
-            image=os.path.join(stim_dir, "NS", self.NS),
+            image=os.path.join(stim_dir, "NS_equalized", self.NS),
             size=(300, 300)
         )
         self.CS_img = visual.ImageStim(
             self.session.win,
-            image=os.path.join(stim_dir, "CS", self.CS),
+            image=os.path.join(stim_dir, "CS_equalized", self.CS),
             size=(300, 300)
         )
         self.US_img = visual.ImageStim(
             self.session.win,
-            image=os.path.join(stim_dir, "US", self.US),
+            image=os.path.join(stim_dir, "US_equalized", self.US),
             size=(300, 300)
         )
 
