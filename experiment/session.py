@@ -29,8 +29,8 @@ PHASES = {
     "EXT":              ("context", 4.0),
     "coherence":        ("coherence", 4.0),
     "reinforced_EXT":   ("fixcross", 4.0),  # duration defined per phase
-    "fixcross":         ("fixcross", random.randint(1,3)),
-    "fixcross_long":    ("fixcross", random.randint(5, 7)),
+    "fixcross":         ("fixcross", (1,3)),
+    "fixcross_long":    ("fixcross", (5, 7)),
 }
 
 SESSION_CONFIG = {
@@ -73,6 +73,49 @@ def resolve_condition_label(sess: int, condition: int) -> str:
             return "EXT"
 
     raise ValueError(f"Unknown session: {sess}")
+
+# functions for randomisation of trials
+# checking function for two conditions and three valence
+def is_valid_sequence(df):
+    # No more than 2 identical conditions in a row
+    for i in range(len(df) - 2):
+        if (
+            df["condition"].iloc[i]
+            == df["condition"].iloc[i + 1]
+            == df["condition"].iloc[i + 2]
+        ):
+            return False
+
+    # No more than 3 identical valences in a row
+    for i in range(len(df) - 3):
+        if (
+            df["valence"].iloc[i]
+            == df["valence"].iloc[i + 1]
+            == df["valence"].iloc[i + 2]
+            == df["valence"].iloc[i + 3]
+        ):
+            return False
+
+    return True
+
+# in case we want reproducible seeds per subject/session
+# seed = hash(f"{self.output_str}_block{block}") % (2**32)
+
+#Create psuedorandom stimset order
+def pseudorandomize_stimset(stimset, max_attempts=10000, seed=None):
+
+    if seed is not None:
+        random.seed(seed)
+
+    for _ in range(max_attempts):
+        shuffled = stimset.sample(frac=1).reset_index(drop=True)
+
+        if is_valid_sequence(shuffled):
+            shuffled = shuffled.copy()
+            shuffled["presentation_order"] = range(1, len(shuffled) + 1)
+            return shuffled
+
+    raise RuntimeError("Could not generate a valid sequence.")
 
 
 class ExtinctionSession(Session):
@@ -156,7 +199,11 @@ class ExtinctionSession(Session):
             draw_name, duration = PHASES[phase_key]
 
             if isinstance(duration, tuple):
-                duration = random.uniform(*duration)
+                lo, hi = duration
+                duration = random.randint(lo,hi)
+
+            if self.test_mode:
+                duration *= 0.1  # speed up for testing
 
             phase_names.append(phase_key)
             phase_durations.append(duration)
@@ -174,7 +221,13 @@ class ExtinctionSession(Session):
 
             is_last_block = (block == self.blocks - 1)
 
-            for trial_nr, stim_row in self.stimset.iterrows():
+            # Randomize order uniquely per block
+            randomized_stimset = pseudorandomize_stimset(
+                self.stimset,
+                seed=None  # or use subject/block-based seed
+            )
+
+            for trial_nr, stim_row in randomized_stimset.iterrows():
 
                 # declare parameters
                 params = stim_row.to_dict()
