@@ -62,23 +62,31 @@ class ExtinctionTrial(Trial):
 
         # Stimulus directory
         stim_dir = os.path.join(os.path.dirname(__file__), "stimulus_files")
-        self.context = self.parameters["context"]
-        self.NS = self.parameters["NS"]
         self.CS = self.parameters["CS"]
         self.US = self.parameters["US"]
         self.US_sound_file = self.parameters["US_sound"]
 
-        # Images
-        self.context_img = visual.ImageStim(
+        # add context image only for sess 1 and 2
+        if self.session.sess != 3:
+            self.context = self.parameters["context"]
+
+            # Images
+            self.context_img = visual.ImageStim(
             self.session.win,
             image=os.path.join(stim_dir, "contexts_equalized", self.context),
             size=self.session.settings["window"]["size"]
         )
-        self.NS_img = visual.ImageStim(
+
+        # NS image only for sess 1 and 3
+        if self.session.sess != 2:
+            self.NS = self.parameters["NS"]
+
+            self.NS_img = visual.ImageStim(
             self.session.win,
             image=os.path.join(stim_dir, "NS_equalized", self.NS),
             size=(300, 300)
         )
+
         self.CS_img = visual.ImageStim(
             self.session.win,
             image=os.path.join(stim_dir, "CS_equalized", self.CS),
@@ -237,6 +245,9 @@ class ExtinctionTrial(Trial):
             self.context_img.draw()
             self.CS_img.draw()
 
+        elif self.phase_name == "CS_only":  # CS day 3, without context
+            self.CS_img.draw()
+
         elif self.phase_name == "CS_distress":  # CS_distress
             self.context_img.draw()
             self.CS_img.draw()
@@ -251,8 +262,24 @@ class ExtinctionTrial(Trial):
             if buttons[0] and not self.distress_started:
                 self.distress_started = True
 
+        elif self.phase_name == "CS_distress_only":  # CS_distress day 3, without context
+            self.CS_img.draw()
+            self.distress_box.draw()
+            self.distress_text.draw()
+            self.distress_slider.draw()
+            buttons = self.session.mouse.getPressed()
+            # BEFORE first click → keep mouse centered
+            if not self.distress_started:
+                self.session.mouse.setPos(self.distress_slider.pos)
+            # FIRST click → allow normal slider behavior
+            if buttons[0] and not self.distress_started:
+                self.distress_started = True
+
         elif self.phase_name == "US":  # US
             self.context_img.draw()
+            self.US_img.draw()
+
+        elif self.phase_name == "US_only":  # US day 3, without context
             self.US_img.draw()
 
         elif self.phase_name == "coherence":  # Coherence
@@ -272,20 +299,30 @@ class ExtinctionTrial(Trial):
 
     def on_phase_end(self):
         """Called automatically when a phase ends. For fMRI experiment: change slider values to joystick input"""
+        self.phase_name = self.phase_names[self.phase]
         # Log slider value at end of distress phase
-        if self.phase == "CS_distress":  # CS_distress
+        if self.phase_name == "CS_distress":  # CS_distress
             self.session.win.flip()  # make sure last mouse events are processed
             distress_rating = self.distress_slider.getRating() 
             if distress_rating is None:
-                distress_rating = NA  # use NAN if none selected
+                distress_rating = np.nan  # use NAN if none selected
             print("Distress rating recorded. Rating is the following: ", self.distress_slider.getRating())
             self.log_slider(value=distress_rating, phase_name='distress_value')
 
-        elif self.phase == "coherence":  # Coherence
+        # Log slider value at end of distress phase
+        if self.phase_name == "CS_distress_only":  # CS_distress
+            self.session.win.flip()  # make sure last mouse events are processed
+            distress_rating = self.distress_slider.getRating() 
+            if distress_rating is None:
+                distress_rating = np.nan  # use NAN if none selected
+            print("Distress rating recorded. Rating is the following: ", self.distress_slider.getRating())
+            self.log_slider(value=distress_rating, phase_name='distress_value')
+
+        elif self.phase_name == "coherence":  # Coherence
             self.session.win.flip()  # make sure last mouse events are processed
             coherence_rating = self.coherence_slider.getRating() 
             if coherence_rating is None:
-                coherence_rating = NA  # use NAN if none selected
+                coherence_rating = np.nan  # use NAN if none selected
             print("Coherence rating recorded. Rating is the following: ", self.coherence_slider.getRating())
             self.log_slider(value=coherence_rating, phase_name='coherence_value')
 

@@ -11,11 +11,12 @@ from exptools2.core import Session
 from trial import ExtinctionTrial
 import numpy as np
 import pandas as pd
-from psychopy import visual
+from psychopy import core, visual, event
 import random
 # from psychopy.core import getMouse
 import os
 import sys
+import yaml
 
 PHASES = {
     "context":          ("context", 1.0),
@@ -126,7 +127,7 @@ class ExtinctionSession(Session):
     instructions, and data collection.
     """
     
-    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml", sess=None, version=None, test_mode=True, blocks=3):
+    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml", sess=None, version=None, test_mode=False, blocks=3):
         """
         Initialize ExtinctionSession.
         
@@ -161,15 +162,25 @@ class ExtinctionSession(Session):
             print(f"Error: Session {self.sess} is not defined. Please provide a valid session number (1, 2, or 3).")
             sys.exit(1)
 
+        instructions_path = os.path.join(
+            os.path.dirname(__file__),
+            "Instructions.yml",)
+        
+        with open(instructions_path, 'r') as file:
+            self.instructions = yaml.safe_load(file)
+
         #load stimulus set based on version and session
         #load day 1 practice stimset, to be done prior to start of session 1
         practice_stimset_path = os.path.join(
             os.path.dirname(__file__),
             "Practice_stimsets",
-            f"day1_practice_stimset.tsv"
+            "day1_practice_stimset.tsv"
         )
         self.practice_stimset = pd.read_csv(practice_stimset_path, sep="\t")
         practice_phase_names = ["context", "NS", "context", "CS", "CS_distress", "US", "context", "coherence", "fixcross"]
+
+        if self.practice_stimset.empty:
+            raise RuntimeError("Practice stimset contains no trials.")  
 
         # stimset_path = os.path.join(
         #     os.path.dirname(__file__),
@@ -185,6 +196,36 @@ class ExtinctionSession(Session):
 
         self.stimset = pd.read_csv(stimset_path, sep="\t")
         self.n_trials = len(self.stimset)
+
+    
+    def show_text_screen(self, text, height=28, color="black", wait_keys=None, duration=None):
+        """Show a full-screen text and wait for key press."""
+        
+        msg = visual.TextStim(
+            win=self.win,
+            text=text,
+            height=height,
+            color=color,
+            wrapWidth=0.9 * self.win.size[0],
+        )
+
+        msg.draw()
+        self.win.flip()
+
+        # Clear old key presses
+        event.clearEvents(eventType="keyboard")
+
+        if duration is not None:
+            # Wait for specified duration
+            core.wait(duration * 60)  # convert to minutes
+        else:
+            # Wait for allowed keys
+            event.waitKeys(keyList=list(wait_keys or ["space"]))
+    
+    # add instruction helper function
+    def show_instruction_sequence(self, texts, **format_kwargs):
+        for text in texts:
+            self.show_text_screen(text.format(**format_kwargs))
         
         
     def get_phases_for_trial(self, condition_label: str, is_last_block: bool):
@@ -211,9 +252,9 @@ class ExtinctionSession(Session):
                 duration = random.randint(lo,hi)
 
             if self.test_mode:
-                duration *= 0.1  # speed up for testing
+                duration *= 0.01  # speed up for testing
 
-            phase_names.append(phase_key)
+            phase_names.append(draw_name)
             phase_durations.append(duration)
 
         return dict(names=phase_names, durations=phase_durations)
@@ -234,8 +275,13 @@ class ExtinctionSession(Session):
 
             phases = self.get_phases_for_trial(
                 condition_label=condition_label,
-                is_last_block=True,   # ← KEY LINE
+                is_last_block=True,   
             )
+
+            if trial_nr == 0:
+                print("Practice trial phases:", phases["names"])
+                print("Practice trial durations:", phases["durations"])
+                print(params)
 
             trial = ExtinctionTrial(
                 session=self,
@@ -250,17 +296,66 @@ class ExtinctionSession(Session):
         return practice_trials
 
         
-    def create_trials(self):
-        """Create trial list for the session."""
-        self.trials = []
-        trial_counter = 0
+    # def create_trials(self):
+    #     """Create trial list for the session."""
+    #     self.trials = []
+    #     trial_counter = 0
         
-        #Add practice trials for session 1
-        if self.sess == 1:
-            practice_trials = self.create_practice_trials()
-            self.trials.extend(practice_trials)
+    #     #Add practice trials for session 1
+    #     if self.sess == 1:
+    #         practice_trials = self.create_practice_trials()
+    #         self.trials.extend(practice_trials)
 
-        #Now loop over blocks, for fMRI make unique blocks per run (so no loop needed, just import run number from main for each block)
+    #     #Now loop over blocks, for fMRI make unique blocks per run (so no loop needed, just import run number from main for each block)
+    #     for block in range(self.blocks):
+
+    #         is_last_block = (block == self.blocks - 1)
+
+    #         # Randomize order uniquely per block
+    #         randomized_stimset = pseudorandomize_stimset(
+    #             self.stimset,
+    #             seed=None  # or use subject/block-based seed
+    #         )
+
+    #         for trial_nr, stim_row in randomized_stimset.iterrows():
+
+    #             # declare parameters
+    #             params = stim_row.to_dict()
+    #             params['block'] = block + 1
+
+    #             condition_value = int(stim_row["condition"])
+    #             condition_label = resolve_condition_label(self.sess, condition_value)
+
+    #             phases = self.get_phases_for_trial(
+    #                 condition_label=condition_label,
+    #                 is_last_block=is_last_block
+    #             )
+
+    #             trial = ExtinctionTrial(
+    #                 session=self,
+    #                 phase_names=phases["names"],
+    #                 phase_durations=phases["durations"],
+    #                 trial_nr=trial_nr,
+    #                 parameters=params
+    #             )
+
+    #             self.trials.append(trial)
+    #             trial_counter += 1
+
+    def create_trials(self):
+        """Create practice and main trials for the session."""
+
+        # practice trials
+        self.practice_trials = []
+
+        if self.sess == 1:
+            self.practice_trials = self.create_practice_trials()
+            print(f"Created {len(self.practice_trials)} practice trials")
+
+
+        # main trials, by block
+        self.trials_by_block = []
+
         for block in range(self.blocks):
 
             is_last_block = (block == self.blocks - 1)
@@ -268,14 +363,15 @@ class ExtinctionSession(Session):
             # Randomize order uniquely per block
             randomized_stimset = pseudorandomize_stimset(
                 self.stimset,
-                seed=None  # or use subject/block-based seed
+                seed=None
             )
+
+            block_trials = []
 
             for trial_nr, stim_row in randomized_stimset.iterrows():
 
-                # declare parameters
                 params = stim_row.to_dict()
-                params['block'] = block + 1
+                params["block"] = block + 1
 
                 condition_value = int(stim_row["condition"])
                 condition_label = resolve_condition_label(self.sess, condition_value)
@@ -293,65 +389,82 @@ class ExtinctionSession(Session):
                     parameters=params
                 )
 
-                self.trials.append(trial)
-                trial_counter += 1
-    
+                block_trials.append(trial)
 
+            self.trials_by_block.append(block_trials)    
+
+
+    # def run(self):
+    #     """Run the experimental session."""
+    #     # Display instructions
+    #     # self.display_instructions()
+        
+    #     # Create trials
+    #     self.create_trials()
+        
+    #     # Start experiment
+    #     self.start_experiment()
+        
+    #     # --- Run practice trials first (session 1 only) ---
+    #     if self.sess == 1:
+    #         for trial in self.trials:
+    #             if trial.parameters.get("practice", False):
+    #                 trial.run()
+
+    #         # ⏸ PAUSE AFTER PRACTICE
+    #         self.show_text_screen(
+    #             text =(self.instructions['session_1']['practice'][0]
+    #                 ),
+    #             wait_keys=("space",))
+
+    #     # --- Run main trials ---
+    #     for trial in self.trials:
+    #         if not trial.parameters.get("practice", False):
+    #             trial.run()
+
+    #     # End experiment
+    #     self.close()
 
     def run(self):
         """Run the experimental session."""
-        # Display instructions
-        # self.display_instructions()
-        
-        # Create trials
+
+        # Create main trials
         self.create_trials()
-        
-        # Start experiment
+
+        # main experment
         self.start_experiment()
-        
-        # --- Run practice trials first (session 1 only) ---
+
+        # session instructions
+        session_key = f"session_{self.sess}"
+        self.show_instruction_sequence(
+            self.instructions[session_key]["before_session"]
+        )
+
+        # practice trials for session 1 only
         if self.sess == 1:
-            for trial in self.trials:
-                if trial.parameters.get("practice", False):
-                    trial.run()
-
-            # ⏸ PAUSE AFTER PRACTICE
-            self.visual.show_text(
-                "End of practice.\n\n"
-                "If you have any questions, ask the experimenter now.\n\n"
-                "Press SPACE to continue."
+            self.show_text_screen(
+                self.instructions["session_1"]["practice_start"][0]
             )
-            self.wait_for_keypress("space")
+            for trial in self.practice_trials:
+                trial.run()
 
-        # --- Run main trials ---
-        for trial in self.trials:
-            if not trial.parameters.get("practice", False):
+            # Pause after practice
+            self.show_text_screen(
+                self.instructions["session_1"]["practice_end"][0]
+            )
+
+        for block_idx, block_trials in enumerate(self.trials_by_block):
+
+            # Between-block instructions (not before block 1)
+            if block_idx > 0:
+                block_text = self.instructions[f"session_{self.sess}"]["between_blocks"][0].format(block=block_idx)
+                self.show_text_screen(
+                    text=block_text, 
+                    duration = 0.1  # 30 seconds
+                )
+
+            for trial in block_trials:
                 trial.run()
 
         # End experiment
         self.close()
-
-    # def display_instructions(self):
-    #     """Display instruction screen."""
-    #     instruction_text = """
-    #     Welcome to the Episodic Extinction Experiment
-        
-    #     You will see a series of stimuli on the screen.
-    #     Please respond as instructed.
-        
-    #     Press any key to continue...
-    #     """
-        
-    #     instruction_stim = visual.TextStim(
-    #         self.win,
-    #         text=instruction_text,
-    #         height=0.1,
-    #         wrapWidth=1.5,
-    #         color='white'
-    #     )
-        
-    #     instruction_stim.draw()
-    #     self.win.flip()
-        
-    #     # Wait for key press
-    #     self.win.waitKeys()

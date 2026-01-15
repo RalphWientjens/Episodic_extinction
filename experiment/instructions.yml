@@ -1,0 +1,72 @@
+session_1:
+  before_session:
+    - |
+      Welcome to the experiment.
+
+      In this task, you will see images and sounds.
+      Please pay close attention.
+
+      Press SPACE to continue.
+    - |
+      During some trials, you will be asked to rate
+      how distressed you feel.
+
+      There are no right or wrong answers.
+
+      Press SPACE to continue.
+    - |
+      You will start with two practice trials.
+      If you have any questions after the practice, please let the experimenter know
+
+      Press SPACE to continue.
+  
+
+  practice_start:
+    - | 
+      There will first be two practice episodes.
+
+      Press SPACE to start the practice episodes.
+    
+  practice_end:
+    - |
+      End of the practice episodes.
+
+      If you have any questions, ask the experimenter now.
+
+      If you are ready, press SPACE to start the experiment.
+
+
+  between_blocks:
+    - |
+      End of block {block}.
+
+      Take a short break.
+      Stay still.
+
+      Press SPACE to continue.
+  
+
+
+session_2:
+  before_session:
+    - |
+      Welcome back.
+
+      This session now has shorter episodes, there will only be one foreground image, which may or may not be followed by an outcome scene.
+
+      If you are ready, press SPACE to start the task.
+
+  between_blocks:
+    - |
+      End of block {block}.
+      
+      Please take a short break of 5 minutes.
+      
+      Press SPACE to continue.
+
+session_3:
+  before_session:
+    - |
+      This is the final session.
+
+      Press SPACE to begin.
