@@ -135,4 +135,4 @@ You can use the `exptools2_environment.yml` to install the environment I use or 
 In the terminal, `cd` into the directory containing `main.py`, then run:
 
 ````bash
-python [main.py](http://_vscodecontentref_/0) <subject> <sess> <version>
+python main.py <subject> <sess> <version>

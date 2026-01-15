@@ -38,6 +38,7 @@ logs/
 # Stimuli files, large media, and outputs
 stimuli_files/
 stimulus_files/
+stimulus_files.zip
 old/
 
 # OS
