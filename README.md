@@ -2,6 +2,13 @@
 
 PsychoPy / exptools2 experiment code for an **Episodic Extinction** paradigm. The task presents sequences (“episodes”) consisting of visual scenes and sounds, interleaved with rating phases (distress and story coherence). The experiment is intended to be run across **multiple sessions (day 1–3)** with different trial structures per session.
 
+### The three sessions each serve their own purpose:
+**Session 1: Episodic fear conditioning:** Participants learn 40 unique episodes across 3 blocks, each episode consisting of multiple stimuli (a context (background) image; a neutral image as the narrative stimulus (NS); a neutral image as the conditioned stimulus (CS) and a neutral **or** aversive image-sound combination as the outcome stimulus (OS)). The instructions for participants are to imagine a vivid story while incorporating all the stimuli into one coherent story. During the CS presentation, participants have to indicate how distressed they feel on a visual analogue scale from 0-100. At the end of each episode during the last block, participant have to indicate how coherent their story for that episode was.
+
+**Session 2: Episodic extinction while manipulating context:** The episodes from the first session are shown again, this time while the OS is either omitted (Extinction) or still presented (Continued conditioning). For half of the episodes in each condition, the episodes are either presented in the same context, or in a new context, in comparison to the first session. All episodes are repeated over four blocks. During each CS presentation, participants have to indicate how distressed they feel. The NS is not presented in the second session. 8 of the 40 epiodes are not presented to use as a baseline control for analysis.
+
+**Session 3: Reinforced test:** Each CS is presented once more, this time with no NS **and** no context image. The CS is subsequently reinforced with the OS in the same schedule as in session 2, where the OS is omitted for Extinction episodes, but shown for Continued conditioning episodes and control episodes. During each CS presentation, participants indicate how distressed they feel
+
 > **Sidenote (stimulus files):** the repository expects a stimulus folder structure on disk (images + sounds). If you don’t have the stimulus set, **ask the repository owner** for the stimulus files before attempting to run the experiment.
 
 ---
