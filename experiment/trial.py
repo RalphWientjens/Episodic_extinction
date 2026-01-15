@@ -9,7 +9,7 @@ Trial class for Episodic Extinction experiment.
 from exptools2.core import Trial
 from psychopy import visual
 from psychopy import sound
-from psychopy.core import getTime
+from psychopy.core import getTime, Clock
 from psychopy.event import Mouse
 import numpy as np
 import os
@@ -73,7 +73,8 @@ class ExtinctionTrial(Trial):
             # Images
             self.context_img = visual.ImageStim(
             self.session.win,
-            image=os.path.join(stim_dir, "contexts_equalized", self.context),
+            # image=os.path.join(stim_dir, "contexts_equalized", self.context), #for equalized luminance images
+            image=os.path.join(stim_dir, "contexts", self.context),
             size=self.session.settings["window"]["size"]
         )
 
@@ -83,18 +84,21 @@ class ExtinctionTrial(Trial):
 
             self.NS_img = visual.ImageStim(
             self.session.win,
-            image=os.path.join(stim_dir, "NS_equalized", self.NS),
+            # image=os.path.join(stim_dir, "NS_equalized", self.NS),    #for equalized luminance images
+            image=os.path.join(stim_dir, "NS", self.NS),  
             size=(300, 300)
         )
 
         self.CS_img = visual.ImageStim(
             self.session.win,
-            image=os.path.join(stim_dir, "CS_equalized", self.CS),
+            # image=os.path.join(stim_dir, "CS_equalized", self.CS),  #for equalized luminance images
+            image=os.path.join(stim_dir, "CS", self.CS),
             size=(300, 300)
         )
         self.US_img = visual.ImageStim(
             self.session.win,
-            image=os.path.join(stim_dir, "US_equalized", self.US),
+            # image=os.path.join(stim_dir, "US_equalized", self.US), #for equalized luminance images
+            image=os.path.join(stim_dir, "US", self.US),
             size=(300, 300)
         )
 
@@ -331,24 +335,46 @@ class ExtinctionTrial(Trial):
     def run(self):
         """Run the trial, ensuring phase_end is called."""
         self.last_phase = None
+        self.phase = 0
+        self.exit_phase = False
+        self.exit_trial = False
+
+        # log trial start in session time
+        print(f"Trial {self.trial_nr} starts at {self.session.clock.getTime():.3f}")
+
+        trial_clock = Clock()
+        trial_clock.reset()
+
+        phase_start = 0.0
 
         for phase_dur in self.phase_durations:
-            # log phase start
-            self.session.win.callOnFlip(self.log_phase_info, phase=self.phase)
+
+            # Log phase start ON FLIP, using SESSION time
+            self.session.win.callOnFlip(
+                self.log_phase_info,
+                phase=self.phase
+            )
 
             # load next trial if needed
             if self.load_next_during_phase == self.phase:
                 self.load_next_trial(phase_dur)
 
-            # main phase loop
+             # ---- PHASE LOOP (SECONDS MODE) ----
             if self.timing == 'seconds':
-                self.session.timer.add(phase_dur)
-                while self.session.timer.getTime() < 0 and not self.exit_phase and not self.exit_trial:
+
+                while (
+                    trial_clock.getTime() < phase_start + phase_dur
+                    and not self.exit_phase
+                    and not self.exit_trial
+                ):
                     self.draw()
                     if self.draw_each_frame:
                         self.session.win.flip()
                         self.session.nr_frames += 1
                     self.get_events()
+            
+
+            # ---- PHASE LOOP (FRAMES MODE) ----
             else:
                 for _ in range(phase_dur):
                     if self.exit_phase or self.exit_trial:
@@ -358,36 +384,15 @@ class ExtinctionTrial(Trial):
                     self.get_events()
                     self.session.nr_frames += 1
 
-            # Call custom phase_end
+            # Phase end hook
             self.on_phase_end()
 
             # reset exit_phase
             if self.exit_phase:
-                self.session.timer.reset()
                 self.exit_phase = False
 
             if self.exit_trial:
-                self.session.timer.reset()
                 break
 
+            phase_start += phase_dur
             self.phase += 1
-
-    # def get_events(self):
-    #     """Get keyboard/mouse events."""
-    #     events = super().get_events()
-    #     if self.phase == 4:
-    #         for ev in events:
-    #             if ev.type == 'slider':
-    #                 self.slider_value = self.distress_slider.getRating()
-    #                 self.slider_moved = True
-
-    #     return events
-        # # Process events if needed
-        # if self.phase == 4:  # Distress rating phase
-        #     mouse = self.session.win.getMouse()
-        #     if mouse.getPressed()[0]:  # Left mouse button is pressed
-        #         self.slider_moved = True
-        #         mouse_pos = mouse.getPos()
-        #         self.distress_slider.setValue(mouse_pos[0])  # Update slider value based on mouse x position
-        
-        # return events

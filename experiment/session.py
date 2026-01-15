@@ -127,7 +127,7 @@ class ExtinctionSession(Session):
     instructions, and data collection.
     """
     
-    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml", sess=None, version=None, test_mode=False, blocks=3):
+    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml", sess=None, version=None, test_mode=True, blocks=3):
         """
         Initialize ExtinctionSession.
         
@@ -252,7 +252,7 @@ class ExtinctionSession(Session):
                 duration = random.randint(lo,hi)
 
             if self.test_mode:
-                duration *= 0.01  # speed up for testing
+                duration *= 0.1  # speed up for testing
 
             phase_names.append(draw_name)
             phase_durations.append(duration)
@@ -294,53 +294,6 @@ class ExtinctionSession(Session):
             practice_trials.append(trial)
 
         return practice_trials
-
-        
-    # def create_trials(self):
-    #     """Create trial list for the session."""
-    #     self.trials = []
-    #     trial_counter = 0
-        
-    #     #Add practice trials for session 1
-    #     if self.sess == 1:
-    #         practice_trials = self.create_practice_trials()
-    #         self.trials.extend(practice_trials)
-
-    #     #Now loop over blocks, for fMRI make unique blocks per run (so no loop needed, just import run number from main for each block)
-    #     for block in range(self.blocks):
-
-    #         is_last_block = (block == self.blocks - 1)
-
-    #         # Randomize order uniquely per block
-    #         randomized_stimset = pseudorandomize_stimset(
-    #             self.stimset,
-    #             seed=None  # or use subject/block-based seed
-    #         )
-
-    #         for trial_nr, stim_row in randomized_stimset.iterrows():
-
-    #             # declare parameters
-    #             params = stim_row.to_dict()
-    #             params['block'] = block + 1
-
-    #             condition_value = int(stim_row["condition"])
-    #             condition_label = resolve_condition_label(self.sess, condition_value)
-
-    #             phases = self.get_phases_for_trial(
-    #                 condition_label=condition_label,
-    #                 is_last_block=is_last_block
-    #             )
-
-    #             trial = ExtinctionTrial(
-    #                 session=self,
-    #                 phase_names=phases["names"],
-    #                 phase_durations=phases["durations"],
-    #                 trial_nr=trial_nr,
-    #                 parameters=params
-    #             )
-
-    #             self.trials.append(trial)
-    #             trial_counter += 1
 
     def create_trials(self):
         """Create practice and main trials for the session."""
@@ -393,46 +346,11 @@ class ExtinctionSession(Session):
 
             self.trials_by_block.append(block_trials)    
 
-
-    # def run(self):
-    #     """Run the experimental session."""
-    #     # Display instructions
-    #     # self.display_instructions()
-        
-    #     # Create trials
-    #     self.create_trials()
-        
-    #     # Start experiment
-    #     self.start_experiment()
-        
-    #     # --- Run practice trials first (session 1 only) ---
-    #     if self.sess == 1:
-    #         for trial in self.trials:
-    #             if trial.parameters.get("practice", False):
-    #                 trial.run()
-
-    #         # ⏸ PAUSE AFTER PRACTICE
-    #         self.show_text_screen(
-    #             text =(self.instructions['session_1']['practice'][0]
-    #                 ),
-    #             wait_keys=("space",))
-
-    #     # --- Run main trials ---
-    #     for trial in self.trials:
-    #         if not trial.parameters.get("practice", False):
-    #             trial.run()
-
-    #     # End experiment
-    #     self.close()
-
     def run(self):
         """Run the experimental session."""
 
         # Create main trials
         self.create_trials()
-
-        # main experment
-        self.start_experiment()
 
         # session instructions
         session_key = f"session_{self.sess}"
@@ -445,6 +363,10 @@ class ExtinctionSession(Session):
             self.show_text_screen(
                 self.instructions["session_1"]["practice_start"][0]
             )
+
+            # start experiment timing for session 1
+            self.start_experiment()
+
             for trial in self.practice_trials:
                 trial.run()
 
@@ -452,6 +374,11 @@ class ExtinctionSession(Session):
             self.show_text_screen(
                 self.instructions["session_1"]["practice_end"][0]
             )
+            # self.clock.reset()  # reset clock after practice
+
+        else:
+            #start experiment timing for sessions 2 and 3
+            self.start_experiment()
 
         for block_idx, block_trials in enumerate(self.trials_by_block):
 
@@ -462,6 +389,7 @@ class ExtinctionSession(Session):
                     text=block_text, 
                     duration = 0.1  # 30 seconds
                 )
+                # self.clock.reset()  # reset clock after break
 
             for trial in block_trials:
                 trial.run()
