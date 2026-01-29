@@ -17,6 +17,7 @@ import random
 import os
 import sys
 import yaml
+import serial
 
 PHASES = {
     "context":          ("context", 1.0),
@@ -119,18 +120,25 @@ def pseudorandomize_stimset(stimset, max_attempts=10000, seed=None):
     raise RuntimeError("Could not generate a valid sequence.")
 
 
-class ExtinctionSession(Session):
+class ExtinctionSession(PylinkEyetrackerSession):
     """
     Session class for the Episodic Extinction experiment.
-    
+
     Manages the experimental session including trial sequence,
     instructions, and data collection.
     """
-    
-    def __init__(self, output_str, output_dir=None, settings_file="expsettings.yml", sess=None, version=None, test_mode=True, blocks=3):
+
+    def __init__(self,
+                 output_str,
+                 output_dir=None,
+                 settings_file="expsettings.yml",
+                 sess=None,
+                 version=None,
+                 test_mode=True,
+                 blocks=3):
         """
         Initialize ExtinctionSession.
-        
+
         Parameters
         ----------
         output_str : str
@@ -141,9 +149,13 @@ class ExtinctionSession(Session):
             Path to settings file
         """
         super().__init__(
-            output_str, 
-            output_dir=output_dir, 
-            settings_file=settings_file)
+            output_str,
+            output_dir=output_dir,
+            settings_file=settings_file,
+            eyetracker_on=True)
+
+        # Open serial port
+        self.serialPort = serial.Serial("COM13", baudrate=115200)
 
         self.sess = sess  # Store session number
         self.version = version  # Store version number
@@ -156,7 +168,7 @@ class ExtinctionSession(Session):
         3: 1,
         }
 
-        try: 
+        try:
             self.blocks = self.session_to_blocks[self.sess]
         except KeyError:
             print(f"Error: Session {self.sess} is not defined. Please provide a valid session number (1, 2, or 3).")
@@ -165,7 +177,7 @@ class ExtinctionSession(Session):
         instructions_path = os.path.join(
             os.path.dirname(__file__),
             "Instructions.yml",)
-        
+
         with open(instructions_path, 'r') as file:
             self.instructions = yaml.safe_load(file)
 
@@ -180,7 +192,7 @@ class ExtinctionSession(Session):
         practice_phase_names = ["context", "NS", "context", "CS", "CS_distress", "US", "context", "coherence", "fixcross"]
 
         if self.practice_stimset.empty:
-            raise RuntimeError("Practice stimset contains no trials.")  
+            raise RuntimeError("Practice stimset contains no trials.")
 
         # stimset_path = os.path.join(
         #     os.path.dirname(__file__),
@@ -197,10 +209,10 @@ class ExtinctionSession(Session):
         self.stimset = pd.read_csv(stimset_path, sep="\t")
         self.n_trials = len(self.stimset)
 
-    
+
     def show_text_screen(self, text, height=28, color="black", wait_keys=None, duration=None):
         """Show a full-screen text and wait for key press."""
-        
+
         msg = visual.TextStim(
             win=self.win,
             text=text,
@@ -221,13 +233,13 @@ class ExtinctionSession(Session):
         else:
             # Wait for allowed keys
             event.waitKeys(keyList=list(wait_keys or ["space"]))
-    
+
     # add instruction helper function
     def show_instruction_sequence(self, texts, **format_kwargs):
         for text in texts:
             self.show_text_screen(text.format(**format_kwargs))
-        
-        
+
+
     def get_phases_for_trial(self, condition_label: str, is_last_block: bool):
         """Get phase names and durations for a trial, based off the session and condition."""
         cfg = SESSION_CONFIG[self.sess]
@@ -238,7 +250,7 @@ class ExtinctionSession(Session):
             base_phases.append("coherence")
             base_phases.append("fixcross")
 
-        else: 
+        else:
             base_phases.append("fixcross_long")
 
         phase_names = []
@@ -275,7 +287,7 @@ class ExtinctionSession(Session):
 
             phases = self.get_phases_for_trial(
                 condition_label=condition_label,
-                is_last_block=True,   
+                is_last_block=True,
             )
 
             if trial_nr == 0:
@@ -344,7 +356,7 @@ class ExtinctionSession(Session):
 
                 block_trials.append(trial)
 
-            self.trials_by_block.append(block_trials)    
+            self.trials_by_block.append(block_trials)
 
     def run(self):
         """Run the experimental session."""
@@ -357,6 +369,12 @@ class ExtinctionSession(Session):
         self.show_instruction_sequence(
             self.instructions[session_key]["before_session"]
         )
+
+        # Tracker calibration
+        self.calibrate_eyetracker()
+
+        # Start recording
+        self.start_recording_eyetracker()
 
         # practice trials for session 1 only
         if self.sess == 1:
@@ -386,7 +404,7 @@ class ExtinctionSession(Session):
             if block_idx > 0:
                 block_text = self.instructions[f"session_{self.sess}"]["between_blocks"][0].format(block=block_idx)
                 self.show_text_screen(
-                    text=block_text, 
+                    text=block_text,
                     duration = 0.1  # 30 seconds
                 )
                 # self.clock.reset()  # reset clock after break
@@ -394,5 +412,5 @@ class ExtinctionSession(Session):
             for trial in block_trials:
                 trial.run()
 
-        # End experiment
+        # End experiment (also stops eyetracking recording)
         self.close()

@@ -18,7 +18,7 @@ import os
 class ExtinctionTrial(Trial):
     """
     Trial class for the Episodic Extinction experiment.
-    
+
     This trial presents four stimuli and records distress responses.
     """
 
@@ -27,7 +27,7 @@ class ExtinctionTrial(Trial):
                  verbose=True):
         """
         Initialize ExtinctionTrial.
-        
+
         Parameters
         ----------
         session : Session object
@@ -85,7 +85,7 @@ class ExtinctionTrial(Trial):
             self.NS_img = visual.ImageStim(
             self.session.win,
             # image=os.path.join(stim_dir, "NS_equalized", self.NS),    #for equalized luminance images
-            image=os.path.join(stim_dir, "NS", self.NS),  
+            image=os.path.join(stim_dir, "NS", self.NS),
             size=(300, 300)
         )
 
@@ -123,9 +123,9 @@ class ExtinctionTrial(Trial):
         )
 
         self.distress_text = visual.TextStim(
-            self.session.win, 
-            text='How distressed do you feel?', 
-            height=24, 
+            self.session.win,
+            text='How distressed do you feel?',
+            height=24,
             color='black',
             pos=(distress_pos[0], distress_pos[1]+60)
         )
@@ -157,9 +157,9 @@ class ExtinctionTrial(Trial):
             pos=(coherence_pos)
         )
         self.coherence_text = visual.TextStim(
-            self.session.win, 
-            text='How coherent was your story?', 
-            height=24, 
+            self.session.win,
+            text='How coherent was your story?',
+            height=24,
             color='black',
             pos=(coherence_pos[0], coherence_pos[1]+60)
         )
@@ -195,7 +195,7 @@ class ExtinctionTrial(Trial):
         self.session.global_log.loc[idx, 'phase'] = self.phase
         self.session.global_log.loc[idx, 'response'] = value
         self.session.global_log.loc[idx, 'nr_frames'] = self.session.nr_frames
-    
+
     #For stimulus logging, unnecessary at the moment, can be used in on_phase_start
     def stim_log(self, stimulus):
         """Log stimulus presentation to the session's global_log."""
@@ -307,7 +307,7 @@ class ExtinctionTrial(Trial):
         # Log slider value at end of distress phase
         if self.phase_name == "CS_distress":  # CS_distress
             self.session.win.flip()  # make sure last mouse events are processed
-            distress_rating = self.distress_slider.getRating() 
+            distress_rating = self.distress_slider.getRating()
             if distress_rating is None:
                 distress_rating = np.nan  # use NAN if none selected
             print("Distress rating recorded. Rating is the following: ", self.distress_slider.getRating())
@@ -316,7 +316,7 @@ class ExtinctionTrial(Trial):
         # Log slider value at end of distress phase
         if self.phase_name == "CS_distress_only":  # CS_distress
             self.session.win.flip()  # make sure last mouse events are processed
-            distress_rating = self.distress_slider.getRating() 
+            distress_rating = self.distress_slider.getRating()
             if distress_rating is None:
                 distress_rating = np.nan  # use NAN if none selected
             print("Distress rating recorded. Rating is the following: ", self.distress_slider.getRating())
@@ -324,13 +324,19 @@ class ExtinctionTrial(Trial):
 
         elif self.phase_name == "coherence":  # Coherence
             self.session.win.flip()  # make sure last mouse events are processed
-            coherence_rating = self.coherence_slider.getRating() 
+            coherence_rating = self.coherence_slider.getRating()
             if coherence_rating is None:
                 coherence_rating = np.nan  # use NAN if none selected
             print("Coherence rating recorded. Rating is the following: ", self.coherence_slider.getRating())
             self.log_slider(value=coherence_rating, phase_name='coherence_value')
 
         self.last_phase = None  # reset for next phase
+
+    def log_phase_info(self, phase=None):
+        super().log_phase_info(phase)
+
+        if self.session.serialPort:
+            self.session.serialPort.write(bytearray([phase + 1]))
 
     def run(self):
         """Run the trial, ensuring phase_end is called."""
@@ -372,7 +378,7 @@ class ExtinctionTrial(Trial):
                         self.session.win.flip()
                         self.session.nr_frames += 1
                     self.get_events()
-            
+
 
             # ---- PHASE LOOP (FRAMES MODE) ----
             else:
