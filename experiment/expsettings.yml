@@ -5,11 +5,11 @@ preferences:
 
 window:
     # size: [1024, 576] # very small screen
-    size: [1536, 864] #medium size
+    # size: [1536, 864] #medium size
     # size: [1920, 1080] #fullscreen (small monitor)
     pos: [0, 0]
     color: [0, 0, 0]
-    fullscr: False
+    fullscr: True
     winType: pyglet
     waitBlanking: True
     viewScale: [1,1] #This parameter is added, if scaling is desired, it can be performed here, this is not yet applied to the bar-positions in the runs notebook. If scaled to a smaller window, this will result in less bars presented
