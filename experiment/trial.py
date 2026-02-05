@@ -335,9 +335,6 @@ class ExtinctionTrial(Trial):
     def log_phase_info(self, phase=None):
         super().log_phase_info(phase)
 
-        if self.session.serialPort:
-            self.session.serialPort.write(bytearray([phase + 1]))
-
     def run(self):
         """Run the trial, ensuring phase_end is called."""
         self.last_phase = None
@@ -353,6 +350,8 @@ class ExtinctionTrial(Trial):
 
         phase_start = 0.0
 
+        useParallel = hasattr(self.session, "parallelPort")
+
         for phase_dur in self.phase_durations:
 
             # Log phase start ON FLIP, using SESSION time
@@ -360,6 +359,13 @@ class ExtinctionTrial(Trial):
                 self.log_phase_info,
                 phase=self.phase
             )
+
+            if hasattr(self.session, "serialPort"):
+                self.session.win.callOnFlip(self.session.serialPort.write, bytearray([self.phase + 1]))
+
+            if useParallel:
+                self.session.win.callOnFlip(self.session.parallelPort.setData, self.phase)
+                self.parallelPortStartFrame = 0 # log_phase_info sets session nr_frames to 0.
 
             # load next trial if needed
             if self.load_next_during_phase == self.phase:
@@ -375,6 +381,8 @@ class ExtinctionTrial(Trial):
                 ):
                     self.draw()
                     if self.draw_each_frame:
+                        if useParallel and self.session.nr_frames == self.parallelPortStartFrame + 1:
+                            self.session.win.callOnFlip(self.session.parallelPort.setData, 0)
                         self.session.win.flip()
                         self.session.nr_frames += 1
                     self.get_events()

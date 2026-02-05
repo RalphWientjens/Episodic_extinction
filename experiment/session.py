@@ -5,7 +5,7 @@ Created on Sun Jan 4th 12:00:00 2026
 
 Session class for Episodic Extinction experiment.
 """
-
+from ctypes import windll
 from exptools2.core import PylinkEyetrackerSession
 from exptools2.core import Session
 from trial import ExtinctionTrial
@@ -135,7 +135,10 @@ class ExtinctionSession(PylinkEyetrackerSession):
                  sess=None,
                  version=None,
                  test_mode=True,
-                 blocks=3):
+                 blocks=3,
+                 enable_eyetracker=False,
+                 enable_serial_markers=False,
+                 enable_parallel_markers=False):
         """
         Initialize ExtinctionSession.
 
@@ -152,10 +155,19 @@ class ExtinctionSession(PylinkEyetrackerSession):
             output_str,
             output_dir=output_dir,
             settings_file=settings_file,
-            eyetracker_on=True)
+            eyetracker_on=enable_eyetracker)
 
         # Open serial port
-        self.serialPort = serial.Serial("COM13", baudrate=115200)
+        self.enable_serial_markers = enable_serial_markers
+        if self.enable_serial_markers:
+            self.serialPort = serial.Serial("COM13", baudrate=115200)
+
+        self.enable_parallel_markers = enable_parallel_markers
+        if self.enable_parallel_markers:
+            currentDir = os.path.dirname(os.path.realpath(__file__))
+            windll.LoadLibrary(currentDir + "/inpoutx64.dll")
+            from psychopy import parallel
+            self.parallelPort = parallel.ParallelPort(address='0x3FF8')
 
         self.sess = sess  # Store session number
         self.version = version  # Store version number
@@ -371,10 +383,11 @@ class ExtinctionSession(PylinkEyetrackerSession):
         )
 
         # Tracker calibration
-        self.calibrate_eyetracker()
+        if self.eyetracker_on:
+            self.calibrate_eyetracker()
 
-        # Start recording
-        self.start_recording_eyetracker()
+            # Start recording
+            self.start_recording_eyetracker()
 
         # practice trials for session 1 only
         if self.sess == 1:
