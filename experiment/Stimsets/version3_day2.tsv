@@ -1,33 +1,25 @@
-context	CS	US	US_sound	condition	trial	valence	epsiode_nr
-ContextA09.png	13_rollator.png	negative_13_mouth.png	negative_13_mouth.wav	1	1	1	1
-ContextA22.png	05_leaf.png	negative_02_baby.png	negative_02_baby.wav	1	2	1	2
-ContextA53.png	28_bulb.png	negative_15_plane.png	negative_15_plane.wav	1	3	1	3
-ContextA46.png	20_racket.png	negative_01_vomit.png	negative_01_vomit.wav	1	4	1	4
-ContextA43.png	24_mouse.png	negative_06_drown.png	negative_06_drown.wav	2	1	1	5
-ContextA39.png	06_guitar.png	negative_16_foot.png	negative_16_foot.wav	2	2	1	6
-ContextA08.png	27_basket.png	negative_10_leg.png	negative_10_leg.wav	2	3	1	7
-ContextA18.png	37_cup.png	negative_09_shot.png	negative_09_shot.wav	2	4	1	8
-ContextA19.png	40_toiletpaper.png	negative_19_whip.png	negative_19_whip.wav	3	1	1	9
-ContextA47.png	25_headphones.png	negative_04_burns.png	negative_04_burns.wav	3	2	1	10
-ContextA15.png	04_beer.png	negative_12_eye.png	negative_12_eye.wav	3	3	1	11
-ContextA35.png	39_pingpongpaddle.png	negative_17_hanged.png	negative_17_hanged.wav	3	4	1	12
-ContextA13.png	12_goose.png	negative_18_chainsaw.png	negative_18_chainsaw.wav	4	1	1	13
-ContextA32.png	17_spaghetti.png	negative_20_cat.png	negative_20_cat.wav	4	2	1	14
-ContextA03.png	30_notebook.png	negative_07_abuse.png	negative_07_abuse.wav	4	3	1	15
-ContextA01.png	22_clothespin.png	negative_14_hook.png	negative_14_hook.wav	4	4	1	16
-ContextA36.png	15_parkbench.png	neutral_14_pulley.png	neutral_14_pulley.wav	6	1	2	21
-ContextA33.png	10_compass.png	neutral_20_cat.png	neutral_20_cat.wav	6	2	2	22
-ContextA49.png	36_sandwich.png	neutral_07_student.png	neutral_07_student.wav	6	3	2	23
-ContextA42.png	33_speaker.png	neutral_02_baby.png	neutral_02_baby.wav	6	4	2	24
-ContextA16.png	03_barbecue.png	neutral_12_slice.png	neutral_12_slice.wav	7	1	2	25
-ContextA05.png	23_coffeepot.png	neutral_09_forrest.png	neutral_09_forrest.wav	7	2	2	26
-ContextA17.png	38_watch.png	neutral_08_car.png	neutral_08_car.wav	7	3	2	27
-ContextA44.png	16_spatula.png	neutral_06_swim.png	neutral_06_swim.wav	7	4	2	28
-ContextA11.png	29_magnifier.png	neutral_15_plane.png	neutral_15_plane.wav	8	1	2	29
-ContextA12.png	09_woodencrate.png	neutral_04_lighter.png	neutral_04_lighter.wav	8	2	2	30
-ContextA52.png	35_wateringcan.png	neutral_05_shave.png	neutral_05_shave.wav	8	3	2	31
-ContextA31.png	19_bag.png	neutral_13_toothbrush.png	neutral_13_toothbrush.wav	8	4	2	32
-ContextA40.png	34_umbrella.png	neutral_16_cheese.png	neutral_16_cheese.wav	9	1	2	33
-ContextA54.png	01_brush.png	neutral_01_egg.png	neutral_01_egg.wav	9	2	2	34
-ContextA30.png	32_printer.png	neutral_11_soup.png	neutral_11_soup.wav	9	3	2	35
-ContextA14.png	11_teddy.png	neutral_10_walk.png	neutral_10_walk.wav	9	4	2	36
+CS	US	US_sound	condition	epsiode_nr	valence
+07_tree.jpg	negative_19_whip.jpeg	negative_19_whip.wav	1	1	1
+30_notebook.jpg	negative_12_eye.jpeg	negative_12_eye.wav	1	2	1
+11_teddy.jpg	negative_03_dog.jpeg	negative_03_dog.wav	1	3	1
+31_pen.jpg	negative_11_feces.jpeg	negative_11_feces.wav	1	4	1
+26_lamp.jpg	negative_18_chainsaw.jpeg	negative_18_chainsaw.wav	1	5	1
+32_printer.jpg	negative_06_drown.jpeg	negative_06_drown.wav	1	6	1
+23_coffeepot.jpg	negative_02_baby.jpeg	negative_02_baby.wav	2	7	1
+24_mouse.jpg	negative_05_surgery.jpeg	negative_05_surgery.wav	2	8	1
+06_guitar.jpg	negative_08_car.jpeg	negative_08_car.wav	2	9	1
+15_parkbench.jpg	negative_04_burns.jpeg	negative_04_burns.wav	2	10	1
+14_workbench.jpg	negative_10_leg.jpeg	negative_10_leg.wav	2	11	1
+02_chain.jpg	negative_13_mouth.jpeg	negative_13_mouth.wav	2	12	1
+35_wateringcan.jpg	neutral_17_bike.jpeg	neutral_17_bike.wav	4	19	2
+18_binoculars.jpg	neutral_12_slice.jpeg	neutral_12_slice.wav	4	20	2
+03_barbecue.jpg	neutral_15_plane.jpeg	neutral_15_plane.wav	4	21	2
+22_clothespin.jpg	neutral_20_cat.jpeg	neutral_20_cat.wav	4	22	2
+21_bowl.jpg	neutral_08_car.jpeg	neutral_08_car.wav	4	23	2
+20_racket.jpg	neutral_02_baby.jpeg	neutral_02_baby.wav	4	24	2
+28_bulb.jpg	neutral_06_swim.jpeg	neutral_06_swim.wav	5	25	2
+08_gem.jpg	neutral_07_student.jpeg	neutral_07_student.wav	5	26	2
+16_spatula.jpg	neutral_13_toothbrush.jpeg	neutral_13_toothbrush.wav	5	27	2
+05_leaf.jpg	neutral_19_market.jpeg	neutral_19_market.wav	5	28	2
+04_beer.jpg	neutral_16_cheese.jpeg	neutral_16_cheese.wav	5	29	2
+17_spaghetti.jpg	neutral_09_forrest.jpeg	neutral_09_forrest.wav	5	30	2

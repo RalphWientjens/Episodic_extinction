@@ -5,8 +5,11 @@ Created on Sun Jan 4th 12:00:00 2026
 
 Session class for Episodic Extinction experiment.
 """
-from ctypes import windll
-from exptools2.core import PylinkEyetrackerSession
+
+try:
+    from exptools2.core import PylinkEyetrackerSession #Set on if eyetracker is used, otherwise use Session
+except (ImportError, AttributeError):
+    PylinkEyetrackerSession = None
 from exptools2.core import Session
 from trial import ExtinctionTrial
 import numpy as np
@@ -22,34 +25,34 @@ import serial
 PHASES = {
     "context":          ("context", 1.0),
     "NS":               ("NS", 3.0),
-    "CS":               ("CS", 3.0),
+    "CS":               ("CS", 4.0),
     "CS_only":          ("CS_only", 3.0),
     "CS_distress":      ("CS_distress", 4.0),
     "CS_distress_only": ("CS_distress_only", 4.0),
     "US":               ("US", 4.0),
     "US_only":          ("US_only", 4.0),
-    "EXT":              ("context", 4.0),
+    "EXT":              ("fixcross", 4.0),
     "coherence":        ("coherence", 4.0),
     "reinforced_EXT":   ("fixcross", 4.0),  # duration defined per phase
     "fixcross":         ("fixcross", (1,3)),
-    "fixcross_long":    ("fixcross", (5, 7)),
+    "fixcross_long":    ("fixcross", (8, 12)),
 }
 
 SESSION_CONFIG = {
     1: dict(
-        base=["context", "NS", "context", "CS", "CS_distress", "US", "context"],
+        base=["CS", "US"],
         coherence_last_block=True,
     ),
 
     2: dict(
-        CC=["context", "CS", "CS_distress", "US", "context"],
-        EXT=["context", "CS", "CS_distress", "EXT", "context"],
+        CC=["CS", "US"],
+        EXT=["CS", "EXT"],
         coherence_last_block=True,
     ),
 
     3: dict(
-        reinforced=["CS_only", "CS_distress_only", "US_only"],
-        EXT=["CS_only", "CS_distress_only", "reinforced_EXT"],
+        reinforced=["CS","US"],
+        EXT=["CS", "EXT"],
         coherence_last_block=False,
     ),
 }
@@ -69,7 +72,7 @@ def resolve_condition_label(sess: int, condition: int) -> str:
 
     if sess == 3:
         # reinforced if condition == 10 OR uneven
-        if condition == 10 or condition % 2 == 1:
+        if condition == 6 or condition % 2 == 1:
             return "reinforced"
         else:
             return "EXT"
@@ -120,7 +123,8 @@ def pseudorandomize_stimset(stimset, max_attempts=10000, seed=None):
     raise RuntimeError("Could not generate a valid sequence.")
 
 
-class ExtinctionSession(PylinkEyetrackerSession):
+# class ExtinctionSession(PylinkEyetrackerSession):  # --- IGNORE WHEN NOT USING EYETRACKER ---
+class ExtinctionSession(Session):
     """
     Session class for the Episodic Extinction experiment.
 
@@ -134,6 +138,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
                  settings_file="expsettings.yml",
                  sess=None,
                  version=None,
+                 OS="windows",
                  test_mode=True,
                  blocks=3,
                  enable_eyetracker=False,
@@ -154,24 +159,32 @@ class ExtinctionSession(PylinkEyetrackerSession):
         super().__init__(
             output_str,
             output_dir=output_dir,
-            settings_file=settings_file,
-            eyetracker_on=enable_eyetracker)
+            settings_file=settings_file)
+        
+        OS = self.settings["operating system"]
+        if OS == "windows":
+            from ctypes import windll
+        
+        self.eyetracker_on = self.settings["test_settings"]["eyetracker_on"]
+        
+            # settings_file=settings_file,
+            # eyetracker_on=enable_eyetracker)
 
         # Open serial port
-        self.enable_serial_markers = enable_serial_markers
+        self.enable_serial_markers = self.settings["test_settings"]["serial_markers_on"]
         if self.enable_serial_markers:
             self.serialPort = serial.Serial("COM13", baudrate=115200)
 
-        self.enable_parallel_markers = enable_parallel_markers
+        self.enable_parallel_markers = self.settings["test_settings"]["parallel_markers_on"]
         if self.enable_parallel_markers:
             currentDir = os.path.dirname(os.path.realpath(__file__))
-            windll.LoadLibrary(currentDir + "/inpoutx64.dll")
+            windll.LoadLibrary(currentDir + "/inpoutx64.dll")     # uncomment when running on Windows and using parallel port, make sure to have the inpoutx64.dll in the same directory as this script
             from psychopy import parallel
             self.parallelPort = parallel.ParallelPort(address='0x3FF8')
 
         self.sess = sess  # Store session number
         self.version = version  # Store version number
-        self.test_mode = test_mode
+        self.test_mode = self.settings["test_settings"]["test_mode_on"]  # Store test mode flag
 
         # blocks per session
         self.session_to_blocks = {
@@ -230,6 +243,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
             text=text,
             height=height,
             color=color,
+            font="Arial",
             wrapWidth=0.9 * self.win.size[0],
         )
 

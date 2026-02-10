@@ -66,44 +66,44 @@ class ExtinctionTrial(Trial):
         self.US = self.parameters["US"]
         self.US_sound_file = self.parameters["US_sound"]
 
-        # add context image only for sess 1 and 2
-        if self.session.sess != 3:
-            self.context = self.parameters["context"]
+        # add context image; now we don't use it
+        # if self.session.sess != 3:
+        #     self.context = self.parameters["context"]
 
-            # Images
-            self.context_img = visual.ImageStim(
-            self.session.win,
-            # image=os.path.join(stim_dir, "contexts_equalized", self.context), #for equalized luminance images
-            image=os.path.join(stim_dir, "contexts", self.context),
-            size=self.session.settings["window"]["size"]
-        )
+        #     # Images
+        #     self.context_img = visual.ImageStim(
+        #     self.session.win,
+        #     # image=os.path.join(stim_dir, "contexts_equalized", self.context), #for equalized luminance images
+        #     image=os.path.join(stim_dir, "contexts", self.context),
+        #     size=self.session.settings["window"]["size"]
+        # )
 
         # NS image only for sess 1 and 3
-        if self.session.sess != 2:
-            self.NS = self.parameters["NS"]
+        # if self.session.sess != 2:
+        #     self.NS = self.parameters["NS"]
 
-            self.NS_img = visual.ImageStim(
-            self.session.win,
-            # image=os.path.join(stim_dir, "NS_equalized", self.NS),    #for equalized luminance images
-            image=os.path.join(stim_dir, "NS", self.NS),
-            size=(300, 300)
-        )
+        #     self.NS_img = visual.ImageStim(
+        #     self.session.win,
+        #     # image=os.path.join(stim_dir, "NS_equalized", self.NS),    #for equalized luminance images
+        #     image=os.path.join(stim_dir, "NS", self.NS),
+        #     size=(300, 300)
+        # )
 
         self.CS_img = visual.ImageStim(
             self.session.win,
             # image=os.path.join(stim_dir, "CS_equalized", self.CS),  #for equalized luminance images
             image=os.path.join(stim_dir, "CS", self.CS),
-            size=(300, 300)
+            size=(800, 800)
         )
         self.US_img = visual.ImageStim(
             self.session.win,
             # image=os.path.join(stim_dir, "US_equalized", self.US), #for equalized luminance images
             image=os.path.join(stim_dir, "US", self.US),
-            size=(300, 300)
+            size=(800, 800)
         )
 
         # Fixation cross
-        self.fixation = visual.TextStim(self.session.win, text='+', height=50, color='black')
+        self.fixation = visual.TextStim(self.session.win, text='+', height=50, color='black', font="Arial")
 
         # Sound
         self.US_sound = sound.Sound(os.path.join(stim_dir, "USsounds", self.US_sound_file))
@@ -127,6 +127,7 @@ class ExtinctionTrial(Trial):
             text='How distressed do you feel?',
             height=24,
             color='black',
+            font="Arial",
             pos=(distress_pos[0], distress_pos[1]+60)
         )
 
@@ -161,6 +162,7 @@ class ExtinctionTrial(Trial):
             text='How coherent was your story?',
             height=24,
             color='black',
+            font="Arial",
             pos=(coherence_pos[0], coherence_pos[1]+60)
         )
         self.coherence_slider = visual.Slider(
@@ -196,7 +198,7 @@ class ExtinctionTrial(Trial):
         self.session.global_log.loc[idx, 'response'] = value
         self.session.global_log.loc[idx, 'nr_frames'] = self.session.nr_frames
 
-    #For stimulus logging, unnecessary at the moment, can be used in on_phase_start
+    #For stimulus logging, unnecessary at the moment, can be used in on_phase_start (for VAS value at phase start)
     def stim_log(self, stimulus):
         """Log stimulus presentation to the session's global_log."""
         idx = self.session.global_log.shape[0]
@@ -246,7 +248,6 @@ class ExtinctionTrial(Trial):
             self.NS_img.draw()
 
         elif self.phase_name == "CS":  # CS
-            self.context_img.draw()
             self.CS_img.draw()
 
         elif self.phase_name == "CS_only":  # CS day 3, without context
@@ -280,7 +281,6 @@ class ExtinctionTrial(Trial):
                 self.distress_started = True
 
         elif self.phase_name == "US":  # US
-            self.context_img.draw()
             self.US_img.draw()
 
         elif self.phase_name == "US_only":  # US day 3, without context

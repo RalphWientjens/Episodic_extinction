@@ -1,33 +1,25 @@
-context	CS	US	US_sound	condition	trial	valence	epsiode_nr
-ContextA19.png	39_pingpongpaddle.png	negative_08_car.png	negative_08_car.wav	1	1	1	1
-ContextA25.png	29_magnifier.png	negative_11_feces.png	negative_11_feces.wav	1	2	1	2
-ContextA23.png	13_rollator.png	negative_07_abuse.png	negative_07_abuse.wav	1	3	1	3
-ContextA01.png	26_lamp.png	negative_18_chainsaw.png	negative_18_chainsaw.wav	1	4	1	4
-ContextA49.png	21_bowl.png	negative_20_cat.png	negative_20_cat.wav	2	1	1	5
-ContextA13.png	16_spatula.png	negative_01_vomit.png	negative_01_vomit.wav	2	2	1	6
-ContextA07.png	33_speaker.png	negative_17_hanged.png	negative_17_hanged.wav	2	3	1	7
-ContextA31.png	37_cup.png	negative_14_hook.png	negative_14_hook.wav	2	4	1	8
-ContextA17.png	28_bulb.png	negative_19_whip.png	negative_19_whip.wav	3	1	1	9
-ContextA37.png	06_guitar.png	negative_09_shot.png	negative_09_shot.wav	3	2	1	10
-ContextA30.png	10_compass.png	negative_06_drown.png	negative_06_drown.wav	3	3	1	11
-ContextA51.png	25_headphones.png	negative_13_mouth.png	negative_13_mouth.wav	3	4	1	12
-ContextA48.png	27_basket.png	negative_05_surgery.png	negative_05_surgery.wav	4	1	1	13
-ContextA50.png	03_barbecue.png	negative_03_dog.png	negative_03_dog.wav	4	2	1	14
-ContextA46.png	20_racket.png	negative_15_plane.png	negative_15_plane.wav	4	3	1	15
-ContextA56.png	19_bag.png	negative_02_baby.png	negative_02_baby.wav	4	4	1	16
-ContextA52.png	24_mouse.png	neutral_13_toothbrush.png	neutral_13_toothbrush.wav	6	1	2	21
-ContextA14.png	05_leaf.png	neutral_19_market.png	neutral_19_market.wav	6	2	2	22
-ContextA45.png	07_tree.png	neutral_06_swim.png	neutral_06_swim.wav	6	3	2	23
-ContextA11.png	09_woodencrate.png	neutral_01_egg.png	neutral_01_egg.wav	6	4	2	24
-ContextA44.png	40_toiletpaper.png	neutral_12_slice.png	neutral_12_slice.wav	7	1	2	25
-ContextA41.png	31_pen.png	neutral_15_plane.png	neutral_15_plane.wav	7	2	2	26
-ContextA16.png	04_beer.png	neutral_10_walk.png	neutral_10_walk.wav	7	3	2	27
-ContextA55.png	14_workbench.png	neutral_03_dog.png	neutral_03_dog.wav	7	4	2	28
-ContextA28.png	11_teddy.png	neutral_07_student.png	neutral_07_student.wav	8	1	2	29
-ContextA26.png	35_wateringcan.png	neutral_02_baby.png	neutral_02_baby.wav	8	2	2	30
-ContextA54.png	15_parkbench.png	neutral_17_bike.png	neutral_17_bike.wav	8	3	2	31
-ContextA42.png	34_umbrella.png	neutral_09_forrest.png	neutral_09_forrest.wav	8	4	2	32
-ContextA09.png	30_notebook.png	neutral_20_cat.png	neutral_20_cat.wav	9	1	2	33
-ContextA02.png	38_watch.png	neutral_18_hammer.png	neutral_18_hammer.wav	9	2	2	34
-ContextA22.png	18_binoculars.png	neutral_08_car.png	neutral_08_car.wav	9	3	2	35
-ContextA35.png	23_coffeepot.png	neutral_14_pulley.png	neutral_14_pulley.wav	9	4	2	36
+CS	US	US_sound	condition	epsiode_nr	valence
+11_teddy.jpg	negative_16_foot.jpeg	negative_16_foot.wav	1	1	1
+34_umbrella.jpg	negative_11_feces.jpeg	negative_11_feces.wav	1	2	1
+25_headphones.jpg	negative_12_eye.jpeg	negative_12_eye.wav	1	3	1
+15_parkbench.jpg	negative_20_cat.jpeg	negative_20_cat.wav	1	4	1
+08_gem.jpg	negative_04_burns.jpeg	negative_04_burns.wav	1	5	1
+09_woodencrate.jpg	negative_17_hanged.jpeg	negative_17_hanged.wav	1	6	1
+28_bulb.jpg	negative_08_car.jpeg	negative_08_car.wav	2	7	1
+06_guitar.jpg	negative_15_plane.jpeg	negative_15_plane.wav	2	8	1
+01_brush.jpg	negative_06_drown.jpeg	negative_06_drown.wav	2	9	1
+10_compass.jpg	negative_09_shot.jpeg	negative_09_shot.wav	2	10	1
+12_goose.jpg	negative_13_mouth.jpeg	negative_13_mouth.wav	2	11	1
+05_leaf.jpg	negative_05_surgery.jpeg	negative_05_surgery.wav	2	12	1
+33_speaker.jpg	neutral_18_hammer.jpeg	neutral_18_hammer.wav	4	19	2
+04_beer.jpg	neutral_15_plane.jpeg	neutral_15_plane.wav	4	20	2
+35_wateringcan.jpg	neutral_07_student.jpeg	neutral_07_student.wav	4	21	2
+07_tree.jpg	neutral_04_lighter.jpeg	neutral_04_lighter.wav	4	22	2
+22_clothespin.jpg	neutral_11_soup.jpeg	neutral_11_soup.wav	4	23	2
+03_barbecue.jpg	neutral_16_cheese.jpeg	neutral_16_cheese.wav	4	24	2
+19_bag.jpg	neutral_20_cat.jpeg	neutral_20_cat.wav	5	25	2
+17_spaghetti.jpg	neutral_17_bike.jpeg	neutral_17_bike.wav	5	26	2
+30_notebook.jpg	neutral_06_swim.jpeg	neutral_06_swim.wav	5	27	2
+32_printer.jpg	neutral_08_car.jpeg	neutral_08_car.wav	5	28	2
+29_magnifier.jpg	neutral_09_forrest.jpeg	neutral_09_forrest.wav	5	29	2
+16_spatula.jpg	neutral_10_walk.jpeg	neutral_10_walk.wav	5	30	2
