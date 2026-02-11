@@ -363,10 +363,10 @@ class ExtinctionTrial(Trial):
             )
 
             if hasattr(self.session, "serialPort"):
-                self.session.win.callOnFlip(self.session.serialPort.write, bytearray([self.phase + 1]))
+                self.session.win.callOnFlip(self.session.serialPort.write, bytearray([self.parameters["epsiode_nr"]]))
 
             if useParallel:
-                self.session.win.callOnFlip(self.session.parallelPort.setData, self.phase)
+                self.session.win.callOnFlip(self.session.parallelPort.setData, self.parameters["epsiode_nr"])
                 self.parallelPortStartFrame = 0 # log_phase_info sets session nr_frames to 0.
 
             # load next trial if needed
