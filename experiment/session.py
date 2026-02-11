@@ -6,10 +6,7 @@ Created on Sun Jan 4th 12:00:00 2026
 Session class for Episodic Extinction experiment.
 """
 
-try:
-    from exptools2.core import PylinkEyetrackerSession #Set on if eyetracker is used, otherwise use Session
-except (ImportError, AttributeError):
-    PylinkEyetrackerSession = None
+from exptools2.core import PylinkEyetrackerSession #Set on if eyetracker is used, otherwise use Session
 from exptools2.core import Session
 from trial import ExtinctionTrial
 import numpy as np
@@ -124,10 +121,9 @@ def pseudorandomize_stimset(stimset, max_attempts=10000, seed=None):
 
 
 # class ExtinctionSession(PylinkEyetrackerSession):  # --- IGNORE WHEN NOT USING EYETRACKER ---
-class ExtinctionSession(Session):
+class ExtinctionSession(PylinkEyetrackerSession):
     """
     Session class for the Episodic Extinction experiment.
-
     Manages the experimental session including trial sequence,
     instructions, and data collection.
     """
@@ -173,7 +169,7 @@ class ExtinctionSession(Session):
         # Open serial port
         self.enable_serial_markers = self.settings["test_settings"]["serial_markers_on"]
         if self.enable_serial_markers:
-            self.serialPort = serial.Serial("COM13", baudrate=115200)
+            self.serialPort = serial.Serial("COM3", baudrate=115200)
 
         self.enable_parallel_markers = self.settings["test_settings"]["parallel_markers_on"]
         if self.enable_parallel_markers:
@@ -432,9 +428,14 @@ class ExtinctionSession(Session):
                 block_text = self.instructions[f"session_{self.sess}"]["between_blocks"][0].format(block=block_idx)
                 self.show_text_screen(
                     text=block_text,
-                    duration = 0.1  # 30 seconds
+                    duration = 1.25  # 30 seconds
                 )
-                # self.clock.reset()  # reset clock after break
+                block_text = self.instructions[f"session_{self.sess}"]["end of break"][0].format(block=block_idx)
+                self.show_text_screen(
+                    text=block_text,
+                    duration = 0.25  # 30 seconds
+                )
+
 
             for trial in block_trials:
                 trial.run()
