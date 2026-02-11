@@ -123,8 +123,7 @@ def pseudorandomize_stimset(stimset, max_attempts=10000, seed=None):
     raise RuntimeError("Could not generate a valid sequence.")
 
 
-# class ExtinctionSession(PylinkEyetrackerSession):  # --- IGNORE WHEN NOT USING EYETRACKER ---
-class ExtinctionSession(Session):
+class ExtinctionSession(PylinkEyetrackerSession):
     """
     Session class for the Episodic Extinction experiment.
 
@@ -156,19 +155,17 @@ class ExtinctionSession(Session):
         settings_file : str, optional
             Path to settings file
         """
+        # Load the settings now, since we need them as a parameter to load ourselves.
+        tempSettings = Session(output_str=output_str, output_dir=output_dir, settings_file=settings_file).settings
+
         super().__init__(
             output_str,
             output_dir=output_dir,
-            settings_file=settings_file)
-        
-        OS = self.settings["operating system"]
-        if OS == "windows":
+            settings_file=settings_file,
+            eyetracker_on = tempSettings["test_settings"]["eyetracker_on"])
+
+        if sys.platform == 'win32':
             from ctypes import windll
-        
-        self.eyetracker_on = self.settings["test_settings"]["eyetracker_on"]
-        
-            # settings_file=settings_file,
-            # eyetracker_on=enable_eyetracker)
 
         # Open serial port
         self.enable_serial_markers = self.settings["test_settings"]["serial_markers_on"]

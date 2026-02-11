@@ -142,6 +142,7 @@ class ExtinctionTrial(Trial):
             size=(900, 50),
             labelColor="black",
             lineColor="black",
+            font="Arial"
         )
         self.distress_value = None  # Initial dummy value
         self.distress_slider.setValue(self.distress_value)
@@ -176,6 +177,7 @@ class ExtinctionTrial(Trial):
             size=(900, 50),
             labelColor="black",
             lineColor="black",
+            font="Arial"
         )
         self.coherence_value = None  # Initial dummy value
         self.coherence_slider.setValue(self.coherence_value)
