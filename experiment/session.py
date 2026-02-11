@@ -14,13 +14,15 @@ from exptools2.core import Session
 from trial import ExtinctionTrial
 import numpy as np
 import pandas as pd
-from psychopy import core, visual, event
+from psychopy import core, visual, event, logging
 import random
 # from psychopy.core import getMouse
 import os
 import sys
 import yaml
 import serial
+from pathlib import Path
+import hedfpy
 
 PHASES = {
     "context":          ("context", 1.0),
@@ -123,8 +125,7 @@ def pseudorandomize_stimset(stimset, max_attempts=10000, seed=None):
     raise RuntimeError("Could not generate a valid sequence.")
 
 
-# class ExtinctionSession(PylinkEyetrackerSession):  # --- IGNORE WHEN NOT USING EYETRACKER ---
-class ExtinctionSession(Session):
+class ExtinctionSession(PylinkEyetrackerSession):  # --- IGNORE WHEN NOT USING EYETRACKER ---
     """
     Session class for the Episodic Extinction experiment.
 
@@ -156,19 +157,17 @@ class ExtinctionSession(Session):
         settings_file : str, optional
             Path to settings file
         """
+        # Load the settings now, since we need them as a parameter to load ourselves.
+        tempSettings = Session(output_str=output_str, output_dir=output_dir, settings_file=settings_file).settings
+
         super().__init__(
             output_str,
             output_dir=output_dir,
-            settings_file=settings_file)
-        
-        OS = self.settings["operating system"]
-        if OS == "windows":
+            settings_file=settings_file,
+            eyetracker_on = tempSettings["test_settings"]["eyetracker_on"])
+
+        if sys.platform == 'win32':
             from ctypes import windll
-        
-        self.eyetracker_on = self.settings["test_settings"]["eyetracker_on"]
-        
-            # settings_file=settings_file,
-            # eyetracker_on=enable_eyetracker)
 
         # Open serial port
         self.enable_serial_markers = self.settings["test_settings"]["serial_markers_on"]
@@ -441,3 +440,22 @@ class ExtinctionSession(Session):
 
         # End experiment (also stops eyetracking recording)
         self.close()
+
+    def close(self):
+        # Close base - PylinkEyeTrackerSession will download the EDF file from the EyeLink Host PC and save it in the session output directory.
+        super().close()
+
+        # Check for EDF file
+        if isinstance(self, PylinkEyetrackerSession) and self.eyetracker_on:
+            # Note that following filename is taken from PylinkEyetrackerSession::close() and will thus break if dependency is changed.
+            edfFile = Path(self.output_dir).joinpath(self.output_str + '.edf')
+            if not edfFile.exists() or not edfFile.is_file():
+                logging.warning(f"Expected EyeLink EDF file {edfFile} does not exist")
+                return
+
+            hdf5Filename = edfFile.with_suffix(".hdf5")
+            # Convert to HDF5
+            eyeOperator = hedfpy.HDFEyeOperator(str(hdf5Filename))
+            eyeOperator.add_edf_file(str(edfFile))
+            eyeOperator.edf_message_data_to_hdf()
+            eyeOperator.edf_gaze_data_to_hdf()
