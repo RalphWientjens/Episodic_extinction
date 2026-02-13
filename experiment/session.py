@@ -160,6 +160,9 @@ class ExtinctionSession(PylinkEyetrackerSession):
             settings_file=settings_file,
             eyetracker_on = tempSettings["test_settings"]["eyetracker_on"])
 
+        # Hide mouse cursor based on settings
+        self.win.mouseVisible = self.settings["mouse"]["visible"]
+
         if sys.platform == 'win32':
             from ctypes import windll
 
