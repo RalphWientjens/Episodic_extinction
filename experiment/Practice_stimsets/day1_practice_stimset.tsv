@@ -1,3 +1,3 @@
-context	NS	CS	US	US_sound	condition	trial	valence	epsiode_nr
-ContextC01.png	C01_watermelon01.png	C1_slipper.png	Z01_present.png	Z01_present.wav	1	1	1	99
-ContextC02.png	C02_wineglass01.png	C2_level.png	Z02_boat.png	Z02_boat.wav	1	2	1	99
+CS	US	US_sound	condition	episode_nr	valence
+C1_slipper.jpg	Z01_present.jpeg	Z01_present.wav	1	98	1
+31_pen.jpg	Z02_boat.jpeg	Z02_boat.wav	1	99	1
