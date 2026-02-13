@@ -415,6 +415,9 @@ class ExtinctionSession(PylinkEyetrackerSession):
             # self.clock.reset()  # reset clock after practice
 
         else:
+            self.show_text_screen(
+                self.instructions[f"session_{self.sess}"]["Start instructions"]
+            )
             #start experiment timing for sessions 2 and 3
             self.start_experiment()
 

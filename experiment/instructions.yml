@@ -3,22 +3,53 @@ session_1:
     - |
       Welcome to the experiment.
 
-      In this task, you will see images and sounds.
-      Please pay close attention.
+      In this task, you will see combinations of images and sounds.
+
+      Specifically, each time, two pictures will appear one after the other. The content of the first picture is always a neutral object. 
+      The second picture is either a neutral or an aversive scene. This second picture is accompanied by a matching sound that will be played through the headphones. 
+
+      From now on, we will refer to the first neutral object picture as the cue, and the second picture of a neutral or aversive scene, including the sound, as the outcome.  
 
       Press SPACE to continue.
     - |
-      During some trials, you will be asked to rate
-      how distressed you feel.
+      Your task is to use the cue and the outcome to imagine a vivid story in which you yourself play a central role. 
+      You should imagine that you perceive the story through your own eyes. 
+      When you do this, it is important to form a connection between the two pictures so that when you are given the cue (e.g., a picture of a shoe), 
+      you can recall the outcome (e.g., a picture of a bus with the sound of an engine). 
+      
+      For each cue-outcome pair, it is essential that you spend the entire time vividly imagining your story with the cue-outcome pair, 
+      because you will be tested on these pairs immediately after this imagination phase.
 
-      There are no right or wrong answers.
+      Press SPACE to continue.
+    - | 
+      In each round, you will get to see 36 cue-outcome pairs. 
+      In total there are three rounds, so you will get to see every event three times in total.
+
+      Press SPACE to continue.
+    - | 
+      In the third and final round, you will be asked to rate to what extent you feel like you have succeeded in
+      creating a coherent story with the cue-outcome pairs. With the coherence scale we ask you to rate to what extent you
+      feel you managed to mentally link the pictures and the sound into one single story. This scale ranges from
+      not at all coherent to very coherent.
+
+      Press SPACE to continue   
+    - |  
+      To answer the coherence scale, you should press and hold the left mouse button while moving to the left or right.
+      Once you let go of the mouse, that is your answer. 
+
+      You have 4 seconds to submit your rating, you should submit your answer within these 4 seconds. 
+      This is not very long, so don't overthink your answer and go with your gut feeling.
+
+      There are no right or wrong answers, just try to assess your answers as honestly as possible.
 
       Press SPACE to continue.
     - |
       You will start with two practice trials.
       If you have any questions after the practice, please let the experimenter know
 
-      Press SPACE to continue.
+      We will start with calibrating the eye-tracker.
+
+      Press SPACE to continue, then follow the instructions of the experimenter.
   
 
   practice_start:
@@ -41,7 +72,8 @@ session_1:
       End of block {block}.
 
       Take a short break.
-      Stay still.
+      Please stay still and keep your head on the chin rest.
+
   end of break:
     - |
       The next block wil start in a few seconds!
@@ -52,10 +84,24 @@ session_1:
 
 session_2:
   before_session:
-    - |
+    - | 
       Welcome back.
 
-      This session now has shorter episodes, there will only be one foreground image, which may or may not be followed by an outcome scene.
+      We will start with calibrating the eye-tracker again. Please follow the instructions.
+
+      Press SPACE to continue.
+  Start instructions:
+    - |
+      Today you will be shown the same cue-outcome pairs as yesterday.
+      You should continue imagining vivid stories with these images and sounds. Always from the first person perspective
+      Some outcomes may not be shown. Please update your stories accordingly.
+
+      Press SPACE to continue.
+    - |
+      Today there will be four rounds. In the last round, there will again be a coherence scale for you to rate how coherent your story was.
+
+      There will be no practice block today. The task will start straight away. 
+      If you have any questions, please ask the experimenter now.
 
       If you are ready, press SPACE to start the task.
 
@@ -63,13 +109,31 @@ session_2:
     - |
       End of block {block}.
       
-      Please take a short break of 5 minutes.
-      
-      Press SPACE to continue.
+      Please take a short break.
+      Please stay still and keep your head on the chin rest.
+
+  end of break:
+    - |
+      The next block wil start in a few seconds!
+
+      please GET READY to imagine stories again!
 
 session_3:
   before_session:
     - |
+      Welcome back.
       This is the final session.
 
-      Press SPACE to begin.
+      We will start with calibrating the eye-tracker again. Please follow the instructions.
+
+      Press SPACE to continue.
+
+  Start instructions:
+    - | 
+      Today you will once again see cue-outcome pairs. Please pay close attention.
+
+      You do not have to fill out any rating scales.
+
+      The task will start straight away. Please let the experimenter know if you have any questions.
+
+      Press SPACE to start begin
