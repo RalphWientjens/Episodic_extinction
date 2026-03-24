@@ -11,13 +11,15 @@ from exptools2.core import Session
 from trial import ExtinctionTrial
 import numpy as np
 import pandas as pd
-from psychopy import core, visual, event
+from psychopy import core, visual, event, logging
 import random
 # from psychopy.core import getMouse
 import os
 import sys
 import yaml
 import serial
+from pathlib import Path
+import hedfpy
 
 PHASES = {
     "context":          ("context", 1.0),
@@ -445,3 +447,22 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         # End experiment (also stops eyetracking recording)
         self.close()
+
+    def close(self):
+        # Close base - PylinkEyeTrackerSession will download the EDF file from the EyeLink Host PC and save it in the session output directory.
+        super().close()
+
+        # Check for EDF file
+        if isinstance(self, PylinkEyetrackerSession) and self.eyetracker_on:
+            # Note that following filename is taken from PylinkEyetrackerSession::close() and will thus break if dependency is changed.
+            edfFile = Path(self.output_dir).joinpath(self.output_str + '.edf')
+            if not edfFile.exists() or not edfFile.is_file():
+                logging.warning(f"Expected EyeLink EDF file {edfFile} does not exist")
+                return
+
+            hdf5Filename = edfFile.with_suffix(".hdf5")
+            # Convert to HDF5
+            eyeOperator = hedfpy.HDFEyeOperator(str(hdf5Filename))
+            eyeOperator.add_edf_file(str(edfFile))
+            eyeOperator.edf_message_data_to_hdf()
+            eyeOperator.edf_gaze_data_to_hdf()
