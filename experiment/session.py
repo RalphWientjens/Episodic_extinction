@@ -22,36 +22,31 @@ from pathlib import Path
 import hedfpy
 
 PHASES = {
-    "context":          ("context", 1.0),
-    "NS":               ("NS", 3.0),
-    "CS":               ("CS", 4.0),
-    "CS_only":          ("CS_only", 3.0),
+    "CS":               ("CS", 3.0),
     "CS_distress":      ("CS_distress", 4.0),
-    "CS_distress_only": ("CS_distress_only", 4.0),
     "US":               ("US", 4.0),
-    "US_only":          ("US_only", 4.0),
     "EXT":              ("fixcross", 4.0),
     "coherence":        ("coherence", 4.0),
     "reinforced_EXT":   ("fixcross", 4.0),  # duration defined per phase
-    "fixcross":         ("fixcross", (1,3)),
+    "fixcross":         ("fixcross", (4,8)),
     "fixcross_long":    ("fixcross", (8, 12)),
 }
 
 SESSION_CONFIG = {
     1: dict(
-        base=["CS", "US"],
+        base=["CS", "CS_distress", "US"],
         coherence_last_block=True,
     ),
 
     2: dict(
-        CC=["CS", "US"],
-        EXT=["CS", "EXT"],
+        CC=["CS", "CS_distress", "US"],
+        EXT=["CS", "CS_distress", "EXT"],
         coherence_last_block=True,
     ),
 
     3: dict(
-        reinforced=["CS","US"],
-        EXT=["CS", "EXT"],
+        reinforced=["CS", "CS_distress", "US"],
+        EXT=["CS", "CS_distress", "EXT"],
         coherence_last_block=False,
     ),
 }
@@ -66,11 +61,11 @@ def resolve_condition_label(sess: int, condition: int) -> str:
         return "base"
 
     if sess == 2:
-        # uneven → CC, even → EXT
+        # uneven (1 of 5) → CC, even (2 of 4) → EXT
         return "CC" if condition % 2 == 1 else "EXT"
 
     if sess == 3:
-        # reinforced if condition == 10 OR uneven
+        # reinforced if condition == 6 OR uneven
         if condition == 6 or condition % 2 == 1:
             return "reinforced"
         else:
@@ -212,7 +207,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
             "day1_practice_stimset.tsv"
         )
         self.practice_stimset = pd.read_csv(practice_stimset_path, sep="\t")
-        practice_phase_names = ["context", "NS", "context", "CS", "CS_distress", "US", "context", "coherence", "fixcross"]
+        practice_phase_names = ["CS", "CS_distress", "US", "coherence", "fixcross"]
 
         if self.practice_stimset.empty:
             raise RuntimeError("Practice stimset contains no trials.")
@@ -253,7 +248,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         if duration is not None:
             # Wait for specified duration
-            core.wait(duration * 60)  # convert to minutes
+            core.wait(duration)  # convert to minutes
         else:
             # Wait for allowed keys
             event.waitKeys(keyList=list(wait_keys or ["space"]))
@@ -400,6 +395,11 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
             # Start recording
             self.start_recording_eyetracker()
+        
+        # self.show_text_screen(
+        #     text = self.instructions["before_start"],
+        #     duration = 5  # 5 seconds
+        # )
 
         # practice trials for session 1 only
         if self.sess == 1:
@@ -423,6 +423,12 @@ class ExtinctionSession(PylinkEyetrackerSession):
             self.show_instruction_sequence(
                 self.instructions[session_key]["Start instructions"]
             )
+
+            self.show_text_screen(
+                text = self.instructions["before_start"],
+                duration = 5  # 5 seconds
+            )
+            
             #start experiment timing for sessions 2 and 3
             self.start_experiment()
 
@@ -433,12 +439,12 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 block_text = self.instructions[f"session_{self.sess}"]["between_blocks"][0].format(block=block_idx)
                 self.show_text_screen(
                     text=block_text,
-                    duration = 1.25  # 30 seconds
+                    duration = 75  # 75 seconds
                 )
                 block_text = self.instructions[f"session_{self.sess}"]["end of break"][0].format(block=block_idx)
                 self.show_text_screen(
                     text=block_text,
-                    duration = 0.25  # 30 seconds
+                    duration = 15  # 15 seconds
                 )
 
 

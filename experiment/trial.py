@@ -10,9 +10,189 @@ from exptools2.core import Trial
 from psychopy import visual
 from psychopy import sound
 from psychopy.core import getTime, Clock
-from psychopy.event import Mouse
 import numpy as np
 import os
+
+class KeyboardScale:
+    """
+    A horizontally sliding scale driven entirely by keypresses.
+    Replaces visual.Slider for button-box / fMRI contexts.
+
+    Keys:
+        left_key  – move marker left  (decrease value)
+        right_key – move marker right (increase value)
+
+    Parameters
+    ----------
+    win        : psychopy.visual.Window
+    pos        : (x, y) centre of the scale
+    width      : pixel width of the scale bar
+    min_val    : minimum rating value  (default 0)
+    max_val    : maximum rating value  (default 100)
+    start_val  : initial marker position (default 50)
+    step       : value change per keypress (default 2)
+    label_left : text for the left anchor
+    label_right: text for the right anchor
+    question   : question text drawn above the scale
+    left_key   : key name for leftward movement  (default 'left')
+    right_key  : key name for rightward movement (default 'right')
+    """
+
+    def __init__(self, win, pos, width=900,
+                 min_val=0, max_val=100, start_val=50, step=2,
+                 label_left='', label_right='', question='',
+                 left_key='left', right_key='right'):
+
+        self.win = win
+        self.pos = pos
+        self.width = width
+        self.min_val = min_val
+        self.max_val = max_val
+        self.step = step
+        self.left_key = left_key
+        self.right_key = right_key
+
+        self.value = start_val          # current rating
+        self.activated = False
+        self._start_val = start_val     # stored for reset()
+
+        cx, cy = pos
+
+        # ── Visual components ──────────────────────────────────────────
+
+        # Background box
+        self.box = visual.Rect(
+            win, width=width + 200, height=160,
+            lineColor='black', fillColor='white',
+            pos=(cx, cy)
+        )
+ 
+        # Question text (above the bar)
+        self.question_stim = visual.TextStim(
+            win, text=question, height=24, color='black', font='Arial',
+            pos=(cx, cy + 55), anchorHoriz='center'
+        )
+
+        # Horizontal bar
+        self.bar = visual.Line(
+            win,
+            start=(cx - width / 2, cy),
+            end=(cx + width / 2, cy),
+            lineColor='black', lineWidth=3
+        )
+
+        # Tick marks at each end
+        tick_h = 15
+        self.tick_left = visual.Line(
+            win,
+            start=(cx - width / 2, cy - tick_h),
+            end=(cx - width / 2, cy + tick_h),
+            lineColor='black', lineWidth=2
+        )
+        self.tick_right = visual.Line(
+            win,
+            start=(cx + width / 2, cy - tick_h),
+            end=(cx + width / 2, cy + tick_h),
+            lineColor='black', lineWidth=2
+        )
+
+        # Marker (moveable circle)
+        self.marker = visual.Circle(
+            win, radius=14,
+            fillColor = "grey", lineColor= "darkgrey",
+            pos=self._val_to_pos(start_val)
+        )
+
+        # Anchor labels
+        self.label_left_stim = visual.TextStim(
+            win, text=label_left, height=20, color='black', font='Arial',
+            pos=(cx - width / 2, cy - 35), anchorHoriz='center'
+        )
+        self.label_right_stim = visual.TextStim(
+            win, text=label_right, height=20, color='black', font='Arial',
+            pos=(cx + width / 2, cy - 35), anchorHoriz='center'
+        )
+
+        # Question text (above the bar)
+        self.question_stim = visual.TextStim(
+            win, text=question, height=24, color='black', font='Arial',
+            pos=(cx, cy + 55), anchorHoriz='center'
+        )
+
+        # Numeric readout (below marker)
+        self.readout_stim = visual.TextStim(
+            win, text=str(int(start_val)), height=20, color='black', font='Arial',
+            pos=(cx, cy - 60), anchorHoriz='center'
+        )
+
+    # ── Helpers ───────────────────────────────────────────────────────
+
+    def _val_to_pos(self, val):
+        """Convert a 0-100 value to an x-pixel position on the bar."""
+        cx, cy = self.pos
+        proportion = (val - self.min_val) / (self.max_val - self.min_val)
+        x = (cx - self.width / 2) + proportion * self.width
+        return (x, cy)
+
+    def reset(self, start_val=None):
+        """Reset marker to start_val (or the original start_val if None)."""
+        if start_val is not None:
+            self._start_val = start_val
+        self.value = self._start_val
+        self.activated = False
+        self.marker.fillColor = "grey"
+        self.marker.lineColor = "darkgrey"
+        self._refresh_marker()
+
+    def handle_key(self, key):
+        """
+        Process a single keypress.
+        Call from get_events() with each key string received.
+        Returns True if the key was consumed by this scale.
+        """
+        if key == self.left_key:
+            if not self.activated:
+                self.activated = True
+                self.marker.fillColor = "red"  # <- change color on first press
+                self.marker.lineColor = "black"
+                # value stays at start_val (50), don't move yet on first press
+            else:
+                self.value = max(self.min_val, self.value - self.step)
+            self._refresh_marker()
+            return True
+        
+        elif key == self.right_key:
+            if not self.activated:
+                self.activated = True
+                self.marker.fillColor = "red"  # <- change color on first press
+                self.marker.lineColor = "black"
+                # value stays at start_val (50), don't move yet on first press
+            else:
+                self.value = min(self.max_val, self.value + self.step)
+            self._refresh_marker()
+            return True
+        return False
+
+    def _refresh_marker(self):
+        """Update marker position and numeric readout to match self.value."""
+        self.marker.pos = self._val_to_pos(self.value)
+        self.readout_stim.text = str(int(self.value))
+
+    def getRating(self):
+        """Return current value (mirrors visual.Slider API)."""
+        return self.value
+
+    def draw(self):
+        """Draw all scale components."""
+        self.box.draw()
+        self.question_stim.draw()
+        self.bar.draw()
+        self.tick_left.draw()
+        self.tick_right.draw()
+        self.label_left_stim.draw()
+        self.label_right_stim.draw()
+        self.marker.draw()
+        self.readout_stim.draw()
 
 
 class ExtinctionTrial(Trial):
@@ -60,34 +240,12 @@ class ExtinctionTrial(Trial):
         # Set parameters dict
         self.parameters = parameters or {}
 
+        # ============================ STIMULI =======================================
         # Stimulus directory
         stim_dir = os.path.join(os.path.dirname(__file__), "stimulus_files")
         self.CS = self.parameters["CS"]
         self.US = self.parameters["US"]
         self.US_sound_file = self.parameters["US_sound"]
-
-        # add context image; now we don't use it
-        # if self.session.sess != 3:
-        #     self.context = self.parameters["context"]
-
-        #     # Images
-        #     self.context_img = visual.ImageStim(
-        #     self.session.win,
-        #     # image=os.path.join(stim_dir, "contexts_equalized", self.context), #for equalized luminance images
-        #     image=os.path.join(stim_dir, "contexts", self.context),
-        #     size=self.session.settings["window"]["size"]
-        # )
-
-        # NS image only for sess 1 and 3
-        # if self.session.sess != 2:
-        #     self.NS = self.parameters["NS"]
-
-        #     self.NS_img = visual.ImageStim(
-        #     self.session.win,
-        #     # image=os.path.join(stim_dir, "NS_equalized", self.NS),    #for equalized luminance images
-        #     image=os.path.join(stim_dir, "NS", self.NS),
-        #     size=(300, 300)
-        # )
 
         self.CS_img = visual.ImageStim(
             self.session.win,
@@ -108,87 +266,46 @@ class ExtinctionTrial(Trial):
         # Sound
         self.US_sound = sound.Sound(os.path.join(stim_dir, "USsounds", self.US_sound_file))
 
-        # Define sliders
-        # Distress slider
-        distress_pos = (0, -self.session.settings["window"]["size"][1]//2 + 100)
+        # ============================ Use keyboard scales instead =======================================
+        # Position: near the bottom of the screen for distress (shown over CS),
+        # centred for coherence (shown alone during ITI).
+        distress_pos  = (0, -self.session.settings["window"]["size"][1] // 2 - 20) 
         coherence_pos = (0, 0)
 
-        self.distress_box = visual.Rect(
-            self.session.win,
-            width=1100,
-            height=150,
-            lineColor='black',
-            fillColor='white',
-            pos=(distress_pos)
-        )
-
-        self.distress_text = visual.TextStim(
-            self.session.win,
-            text='How distressed do you feel?',
-            height=24,
-            color='black',
-            font="Arial",
-            pos=(distress_pos[0], distress_pos[1]+60)
-        )
-
-        self.distress_slider = visual.Slider(
+        self.distress_scale = KeyboardScale(
             win=self.session.win,
-            ticks=(0, 100),
-            granularity=0,
-            style='rating',
-            labels=["not at all distressed", "very distressed"],
-            labelHeight=20,
-            pos=(distress_pos),
-            size=(900, 50),
-            labelColor="black",
-            lineColor="black",
-            font="Arial"
+            pos=distress_pos,
+            width=900,
+            min_val=0, max_val=100, start_val=50, step=10,
+            label_left='not at all distressed',
+            label_right='very distressed',
+            question='How distressed do you feel?',
+            left_key='left', right_key='right'       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
         )
-        self.distress_value = None  # Initial dummy value
-        self.distress_slider.setValue(self.distress_value)
-        self.distress_started = False
-        # self.slider_moved = False
 
-        # Coherence slider
-        self.coherence_box = visual.Rect(
-            self.session.win,
-            width=1100,
-            height=150,
-            lineColor='black',
-            fillColor='white',
-            pos=(coherence_pos)
-        )
-        self.coherence_text = visual.TextStim(
-            self.session.win,
-            text='How coherent was your story?',
-            height=24,
-            color='black',
-            font="Arial",
-            pos=(coherence_pos[0], coherence_pos[1]+60)
-        )
-        self.coherence_slider = visual.Slider(
+        self.coherence_scale = KeyboardScale(
             win=self.session.win,
-            ticks=(0, 100),
-            granularity=0,
-            style='rating',
-            labels=["not at all coherent", "very coherent"],
-            labelHeight=20,
-            pos=(coherence_pos),
-            size=(900, 50),
-            labelColor="black",
-            lineColor="black",
-            font="Arial"
+            pos=coherence_pos,
+            width=900,
+            min_val=0, max_val=100, start_val=50, step=10,
+            label_left='not at all coherent',
+            label_right='very coherent',
+            question='How coherent was your story?',
+            left_key='left', right_key='right'
         )
-        self.coherence_value = None  # Initial dummy value
-        self.coherence_slider.setValue(self.coherence_value)
-        self.coherence_started = False
-
         # self.phase = None  # Initialize phase to avoid AttributeError
         # self.last_phase = None
+ 
+        # Track which scale is active so get_events() knows where to route keys
+        self._active_scale = None
 
         #Set blocks and properties per block if needed
         self.block = self.parameters['block']
 
+    # =========================================================================
+    # Logging helpers
+    # =========================================================================
+ 
     # For logging slider values, used in on_phase_end
     def log_slider(self, value, phase_name=None):
         """Log the distress slider value to the session's global_log."""
@@ -211,7 +328,10 @@ class ExtinctionTrial(Trial):
         self.session.global_log.loc[idx, 'stimulus'] = stimulus
         self.session.global_log.loc[idx, 'nr_frames'] = self.session.nr_frames
 
-
+    # =========================================================================
+    # Phase hooks
+    # =========================================================================
+ 
     def on_phase_start(self, phase):
         """Called when a new phase starts."""
         if 0 <= self.phase < len(self.phase_names):
@@ -220,120 +340,102 @@ class ExtinctionTrial(Trial):
             raise IndexError(f"Phase index {self.phase} is out of bounds for phase_names.")
 
         if self.phase_name == "CS_distress":
-            # Reset slider
-            self.distress_slider.reset()
-            # Warp mouse to slider position
-            self.session.mouse.setPos(self.distress_slider.pos)
+            self.distress_scale.reset()             # Marker reset to start_val (50)
+            self._active_scale = self.distress_scale
 
         # Play US sound during US phase
         elif self.phase_name == "US":
             self.US_sound.play()
+            self._active_scale = None  # No scale active during US presentation
 
         elif self.phase_name == "coherence":
-            # Reset slider
-            self.coherence_slider.reset()
-            # Warp mouse to slider position
-            self.session.mouse.setPos(self.coherence_slider.pos)
+            self.coherence_scale.reset()             # Marker reset to start_val (50)
+            self._active_scale = self.coherence_scale
 
+        else:
+            self._active_scale = None
 
     def draw(self):
+        """Called every frame by the run loop. Delegates to on_phase_start on
+        the first frame of each phase, then draws the appropriate stimuli."""
+ 
         if self.last_phase is None or self.phase != self.last_phase:
             self.on_phase_start(self.phase)
             self.last_phase = self.phase
 
-        # Draw stimuli based on phase
-        if self.phase_name == "context":  # context
-            self.context_img.draw()
-
-        elif self.phase_name == "NS":  # NS
-            self.context_img.draw()
-            self.NS_img.draw()
-
+        # Draw stimuli per phase
         elif self.phase_name == "CS":  # CS
             self.CS_img.draw()
-
-        elif self.phase_name == "CS_only":  # CS day 3, without context
-            self.CS_img.draw()
+            self.fixation.draw()
 
         elif self.phase_name == "CS_distress":  # CS_distress
-            self.context_img.draw()
             self.CS_img.draw()
-            self.distress_box.draw()
-            self.distress_text.draw()
-            self.distress_slider.draw()
-            buttons = self.session.mouse.getPressed()
-            # BEFORE first click → keep mouse centered
-            if not self.distress_started:
-                self.session.mouse.setPos(self.distress_slider.pos)
-            # FIRST click → allow normal slider behavior
-            if buttons[0] and not self.distress_started:
-                self.distress_started = True
-
-        elif self.phase_name == "CS_distress_only":  # CS_distress day 3, without context
-            self.CS_img.draw()
-            self.distress_box.draw()
-            self.distress_text.draw()
-            self.distress_slider.draw()
-            buttons = self.session.mouse.getPressed()
-            # BEFORE first click → keep mouse centered
-            if not self.distress_started:
-                self.session.mouse.setPos(self.distress_slider.pos)
-            # FIRST click → allow normal slider behavior
-            if buttons[0] and not self.distress_started:
-                self.distress_started = True
+            self.fixation.draw()
+            self.distress_scale.draw()
 
         elif self.phase_name == "US":  # US
             self.US_img.draw()
-
-        elif self.phase_name == "US_only":  # US day 3, without context
-            self.US_img.draw()
+            self.fixation.draw()
 
         elif self.phase_name == "coherence":  # Coherence
-            self.coherence_box.draw()
-            self.coherence_text.draw()
-            self.coherence_slider.draw()
-            buttons = self.session.mouse.getPressed()
-            # BEFORE first click → keep mouse centered
-            if not self.coherence_started:
-                self.session.mouse.setPos(self.coherence_slider.pos)
-            # FIRST click → allow normal slider behavior
-            if buttons[0] and not self.coherence_started:
-                self.coherence_started = True
+            self.coherence_scale.draw()
 
         elif self.phase_name == "fixcross":  # fixcross
             self.fixation.draw()
 
+    # =========================================================================
+    # Event handling
+    # =========================================================================
+ 
+    def get_events(self):
+        """
+        Override the exptools2 get_events() so that during rating phases
+        keypresses are forwarded to the active KeyboardScale.
+ 
+        The super() call preserves all default exptools2 behaviour
+        (quit-key detection, trigger logging, etc.) and returns a list of
+        (key, timestamp) tuples that we can inspect afterwards.
+        """
+        events = super().get_events()
+ 
+        # Route arrow keys (or button-box keys) to whichever scale is active
+        if self._active_scale is not None:
+            for key, t in events:
+                self._active_scale.handle_key(key)
+ 
+        return events
+ 
+    # =========================================================================
+    # Phase end
+    # =========================================================================
+
     def on_phase_end(self):
-        """Called automatically when a phase ends. For fMRI experiment: change slider values to joystick input"""
+        """
+        Called automatically when a phase ends.
+        Reads the final scale value and logs it.
+        """
         self.phase_name = self.phase_names[self.phase]
-        # Log slider value at end of distress phase
-        if self.phase_name == "CS_distress":  # CS_distress
-            self.session.win.flip()  # make sure last mouse events are processed
-            distress_rating = self.distress_slider.getRating()
-            if distress_rating is None:
-                distress_rating = np.nan  # use NAN if none selected
-            print("Distress rating recorded. Rating is the following: ", self.distress_slider.getRating())
-            self.log_slider(value=distress_rating, phase_name='distress_value')
 
         # Log slider value at end of distress phase
-        if self.phase_name == "CS_distress_only":  # CS_distress
-            self.session.win.flip()  # make sure last mouse events are processed
-            distress_rating = self.distress_slider.getRating()
-            if distress_rating is None:
-                distress_rating = np.nan  # use NAN if none selected
-            print("Distress rating recorded. Rating is the following: ", self.distress_slider.getRating())
+        if self.phase_name in ("CS_distress", "CS_distress_only"):
+            distress_rating = self.distress_scale.getRating() if self._active_scale == self.distress_scale else 999
+            print(f"Distress rating recorded: {distress_rating}")
             self.log_slider(value=distress_rating, phase_name='distress_value')
-
-        elif self.phase_name == "coherence":  # Coherence
-            self.session.win.flip()  # make sure last mouse events are processed
-            coherence_rating = self.coherence_slider.getRating()
-            if coherence_rating is None:
-                coherence_rating = np.nan  # use NAN if none selected
-            print("Coherence rating recorded. Rating is the following: ", self.coherence_slider.getRating())
+ 
+        # Log slider value at end of coherence phase
+        elif self.phase_name == "coherence":
+            coherence_rating = self.coherence_scale.getRating() if self._active_scale == self.coherence_scale else 999
+            print(f"Coherence rating recorded: {coherence_rating}")
             self.log_slider(value=coherence_rating, phase_name='coherence_value')
 
+        # Deactivate scale and reset phase-tracking sentinel
+        self._active_scale = None
         self.last_phase = None  # reset for next phase
-
+ 
+    # =========================================================================
+    # Run loop
+    # =========================================================================
+ 
     def log_phase_info(self, phase=None):
         super().log_phase_info(phase)
 
