@@ -18,9 +18,9 @@ def main():
     version = sys.argv[3]
     # eyetracker_on = bool(sys.argv[4])
     
-    output_str= subject+'_sess-'+sess+"_v-"+version
+    output_str= "sub-" + subject+'_sess-'+sess+"_v-"+version
     
-    output_dir = f'./logs/sub-{subject}/{output_str}_Logs'
+    output_dir = f'./logs/sub-{subject}/{output_str}'
     
     if os.path.exists(output_dir):
         print("Warning: output directory already exists. Renaming to avoid overwriting.")
