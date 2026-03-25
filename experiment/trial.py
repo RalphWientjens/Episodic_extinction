@@ -98,7 +98,7 @@ class KeyboardScale:
 
         # Marker (moveable circle)
         self.marker = visual.Circle(
-            win, radius=14,
+            win, radius=20,
             fillColor = "grey", lineColor= "darkgrey",
             pos=self._val_to_pos(start_val)
         )
@@ -269,7 +269,7 @@ class ExtinctionTrial(Trial):
         # ============================ Use keyboard scales instead =======================================
         # Position: near the bottom of the screen for distress (shown over CS),
         # centred for coherence (shown alone during ITI).
-        distress_pos  = (0, -self.session.settings["window"]["size"][1] // 2 - 20) 
+        distress_pos  = (0, -self.session.settings["window"]["size"][1] // 2 - 20 + 100)  # 100 pixels above bottom edge
         coherence_pos = (0, 0)
 
         self.distress_scale = KeyboardScale(
