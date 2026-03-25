@@ -18,7 +18,7 @@ def main():
     version = sys.argv[3]
     # eyetracker_on = bool(sys.argv[4])
     
-    output_str= "sub-" + subject+'_sess-'+sess+"_v-"+version
+    output_str= "sub-" + subject+'_ses-'+sess+"_v-"+version
     
     output_dir = f'./logs/sub-{subject}/{output_str}'
     
