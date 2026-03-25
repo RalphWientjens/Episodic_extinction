@@ -82,23 +82,23 @@ class KeyboardScale:
         )
 
         # Tick marks at each end
-        tick_h = 15
+        tick_h = 25
         self.tick_left = visual.Line(
             win,
             start=(cx - width / 2, cy - tick_h),
             end=(cx - width / 2, cy + tick_h),
-            lineColor='black', lineWidth=2
+            lineColor='black', lineWidth=5
         )
         self.tick_right = visual.Line(
             win,
             start=(cx + width / 2, cy - tick_h),
             end=(cx + width / 2, cy + tick_h),
-            lineColor='black', lineWidth=2
+            lineColor='black', lineWidth=5
         )
 
         # Marker (moveable circle)
         self.marker = visual.Circle(
-            win, radius=20,
+            win, radius=25,
             fillColor = "grey", lineColor= "darkgrey",
             pos=self._val_to_pos(start_val)
         )
@@ -269,7 +269,7 @@ class ExtinctionTrial(Trial):
         # ============================ Use keyboard scales instead =======================================
         # Position: near the bottom of the screen for distress (shown over CS),
         # centred for coherence (shown alone during ITI).
-        distress_pos  = (0, -self.session.settings["window"]["size"][1] // 2 - 20 + 100)  # 100 pixels above bottom edge
+        distress_pos  = (0, -self.session.settings["window"]["size"][1] // 2 - 20 - 50) 
         coherence_pos = (0, 0)
 
         self.distress_scale = KeyboardScale(
@@ -277,9 +277,9 @@ class ExtinctionTrial(Trial):
             pos=distress_pos,
             width=900,
             min_val=0, max_val=100, start_val=50, step=10,
-            label_left='not at all distressed',
-            label_right='very distressed',
-            question='How distressed do you feel?',
+            label_left='0',
+            label_right='100',
+            question='DISTRESS?',
             left_key='left', right_key='right'       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
         )
 
