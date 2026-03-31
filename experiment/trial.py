@@ -39,7 +39,7 @@ class KeyboardScale:
     """
 
     def __init__(self, win, pos, width=900,
-                 min_val=0, max_val=100, start_val=50, step=2,
+                 min_val=0, max_val=10, start_val=5, step=1,
                  label_left='', label_right='', question='',
                  left_key='left', right_key='right'):
 
@@ -124,6 +124,7 @@ class KeyboardScale:
             win, text=str(int(start_val)), height=20, color='black', font='Arial',
             pos=(cx, cy - 60), anchorHoriz='center'
         )
+        self.readout_stim.opacity = 0  # start invisible until first keypress
 
     # ── Helpers ───────────────────────────────────────────────────────
 
@@ -142,6 +143,7 @@ class KeyboardScale:
         self.activated = False
         self.marker.fillColor = "grey"
         self.marker.lineColor = "darkgrey"
+        self.readout_stim.opacity = 0  # hide readout until first keypress
         self._refresh_marker()
 
     def handle_key(self, key):
@@ -155,6 +157,7 @@ class KeyboardScale:
                 self.activated = True
                 self.marker.fillColor = "red"  # <- change color on first press
                 self.marker.lineColor = "black"
+                self.readout_stim.opacity = 1  # show readout on first keypress
                 # value stays at start_val (50), don't move yet on first press
             else:
                 self.value = max(self.min_val, self.value - self.step)
@@ -166,6 +169,7 @@ class KeyboardScale:
                 self.activated = True
                 self.marker.fillColor = "red"  # <- change color on first press
                 self.marker.lineColor = "black"
+                self.readout_stim.opacity = 1  # show readout on first keypress
                 # value stays at start_val (50), don't move yet on first press
             else:
                 self.value = min(self.max_val, self.value + self.step)
@@ -276,9 +280,9 @@ class ExtinctionTrial(Trial):
             win=self.session.win,
             pos=distress_pos,
             width=900,
-            min_val=0, max_val=100, start_val=50, step=10,
-            label_left='0',
-            label_right='100',
+            min_val=0, max_val=10, start_val=5, step=1,
+            label_left='Not at all distressed',
+            label_right='Very distressed',
             question='DISTRESS?',
             left_key='left', right_key='right'       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
         )
@@ -287,9 +291,9 @@ class ExtinctionTrial(Trial):
             win=self.session.win,
             pos=coherence_pos,
             width=900,
-            min_val=0, max_val=100, start_val=50, step=10,
-            label_left='not at all coherent',
-            label_right='very coherent',
+            min_val=0, max_val=10, start_val=5, step=1,
+            label_left='Not at all coherent',
+            label_right='Very coherent',
             question='How coherent was your story?',
             left_key='left', right_key='right'
         )
