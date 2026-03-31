@@ -52,7 +52,8 @@ class KeyboardScale:
         self.left_key = left_key
         self.right_key = right_key
 
-        self.value = start_val          # current rating
+        self.value = 999          # current rating
+        self._display_val = start_val   # value currently shown by the marker (lags behind self.value until first keypress)
         self.activated = False
         self._start_val = start_val     # stored for reset()
 
@@ -139,7 +140,8 @@ class KeyboardScale:
         """Reset marker to start_val (or the original start_val if None)."""
         if start_val is not None:
             self._start_val = start_val
-        self.value = self._start_val
+        self.value = 999
+        self._display_val = self._start_val
         self.activated = False
         self.marker.fillColor = "grey"
         self.marker.lineColor = "darkgrey"
@@ -155,32 +157,34 @@ class KeyboardScale:
         if key == self.left_key:
             if not self.activated:
                 self.activated = True
+                self.value = self._display_val  # set to start_val on first press, then move on subsequent presses
                 self.marker.fillColor = "red"  # <- change color on first press
                 self.marker.lineColor = "black"
                 self.readout_stim.opacity = 1  # show readout on first keypress
-                # value stays at start_val (50), don't move yet on first press
             else:
-                self.value = max(self.min_val, self.value - self.step)
+                self._display_val = max(self.min_val, self.value - self.step)
+                self.value = self._display_val
             self._refresh_marker()
             return True
         
         elif key == self.right_key:
             if not self.activated:
                 self.activated = True
+                self.value = self._display_val  # set to start_val on first press, then move on subsequent presses
                 self.marker.fillColor = "red"  # <- change color on first press
                 self.marker.lineColor = "black"
                 self.readout_stim.opacity = 1  # show readout on first keypress
-                # value stays at start_val (50), don't move yet on first press
             else:
-                self.value = min(self.max_val, self.value + self.step)
+                self._display_val = min(self.max_val, self.value + self.step)
+                self.value = self._display_val
             self._refresh_marker()
             return True
         return False
 
     def _refresh_marker(self):
         """Update marker position and numeric readout to match self.value."""
-        self.marker.pos = self._val_to_pos(self.value)
-        self.readout_stim.text = str(int(self.value))
+        self.marker.pos = self._val_to_pos(self._display_val)
+        self.readout_stim.text = str(round(self._display_val, 1))
 
     def getRating(self):
         """Return current value (mirrors visual.Slider API)."""
@@ -422,13 +426,13 @@ class ExtinctionTrial(Trial):
 
         # Log slider value at end of distress phase
         if self.phase_name in ("CS_distress", "CS_distress_only"):
-            distress_rating = self.distress_scale.getRating() if self._active_scale == self.distress_scale else 999
+            distress_rating = self.distress_scale.getRating() 
             print(f"Distress rating recorded: {distress_rating}")
             self.log_slider(value=distress_rating, phase_name='distress_value')
  
         # Log slider value at end of coherence phase
         elif self.phase_name == "coherence":
-            coherence_rating = self.coherence_scale.getRating() if self._active_scale == self.coherence_scale else 999
+            coherence_rating = self.coherence_scale.getRating() #if self._active_scale == self.coherence_scale else 999
             print(f"Coherence rating recorded: {coherence_rating}")
             self.log_slider(value=coherence_rating, phase_name='coherence_value')
 
