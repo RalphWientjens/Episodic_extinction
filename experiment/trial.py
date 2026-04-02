@@ -67,7 +67,7 @@ class KeyboardScale:
             lineColor='black', fillColor='white',
             pos=(cx, cy)
         )
- 
+
         # Question text (above the bar)
         self.question_stim = visual.TextStim(
             win, text=question, height=24, color='black', font='Arial',
@@ -166,7 +166,7 @@ class KeyboardScale:
                 self.value = self._display_val
             self._refresh_marker()
             return True
-        
+
         elif key == self.right_key:
             if not self.activated:
                 self.activated = True
@@ -277,7 +277,7 @@ class ExtinctionTrial(Trial):
         # ============================ Use keyboard scales instead =======================================
         # Position: near the bottom of the screen for distress (shown over CS),
         # centred for coherence (shown alone during ITI).
-        distress_pos  = (0, -self.session.settings["window"]["size"][1] // 2 - 20 - 50) 
+        distress_pos  = (0, -self.session.settings["window"]["size"][1] // 2 - 20 - 50)
         coherence_pos = (0, 0)
 
         self.distress_scale = KeyboardScale(
@@ -303,7 +303,7 @@ class ExtinctionTrial(Trial):
         )
         # self.phase = None  # Initialize phase to avoid AttributeError
         # self.last_phase = None
- 
+
         # Track which scale is active so get_events() knows where to route keys
         self._active_scale = None
 
@@ -313,7 +313,7 @@ class ExtinctionTrial(Trial):
     # =========================================================================
     # Logging helpers
     # =========================================================================
- 
+
     # For logging slider values, used in on_phase_end
     def log_slider(self, value, phase_name=None):
         """Log the distress slider value to the session's global_log."""
@@ -339,7 +339,7 @@ class ExtinctionTrial(Trial):
     # =========================================================================
     # Phase hooks
     # =========================================================================
- 
+
     def on_phase_start(self, phase):
         """Called when a new phase starts."""
         if 0 <= self.phase < len(self.phase_names):
@@ -366,7 +366,7 @@ class ExtinctionTrial(Trial):
     def draw(self):
         """Called every frame by the run loop. Delegates to on_phase_start on
         the first frame of each phase, then draws the appropriate stimuli."""
- 
+
         if self.last_phase is None or self.phase != self.last_phase:
             self.on_phase_start(self.phase)
             self.last_phase = self.phase
@@ -394,25 +394,25 @@ class ExtinctionTrial(Trial):
     # =========================================================================
     # Event handling
     # =========================================================================
- 
+
     def get_events(self):
         """
         Override the exptools2 get_events() so that during rating phases
         keypresses are forwarded to the active KeyboardScale.
- 
+
         The super() call preserves all default exptools2 behaviour
         (quit-key detection, trigger logging, etc.) and returns a list of
         (key, timestamp) tuples that we can inspect afterwards.
         """
         events = super().get_events()
- 
+
         # Route arrow keys (or button-box keys) to whichever scale is active
         if self._active_scale is not None:
             for key, t in events:
                 self._active_scale.handle_key(key)
- 
+
         return events
- 
+
     # =========================================================================
     # Phase end
     # =========================================================================
@@ -426,10 +426,10 @@ class ExtinctionTrial(Trial):
 
         # Log slider value at end of distress phase
         if self.phase_name in ("CS_distress", "CS_distress_only"):
-            distress_rating = self.distress_scale.getRating() 
+            distress_rating = self.distress_scale.getRating()
             print(f"Distress rating recorded: {distress_rating}")
             self.log_slider(value=distress_rating, phase_name='distress_value')
- 
+
         # Log slider value at end of coherence phase
         elif self.phase_name == "coherence":
             coherence_rating = self.coherence_scale.getRating() #if self._active_scale == self.coherence_scale else 999
@@ -439,13 +439,17 @@ class ExtinctionTrial(Trial):
         # Deactivate scale and reset phase-tracking sentinel
         self._active_scale = None
         self.last_phase = None  # reset for next phase
- 
+
     # =========================================================================
     # Run loop
     # =========================================================================
- 
+
     def log_phase_info(self, phase=None):
         super().log_phase_info(phase)
+        if self.eyetracker_on:  # send msg to eyetracker
+            msg = f'trial {self.trial_nr} parameter episode_nr: {self.parameters["episode_nr"]}'
+            self.session.tracker.sendMessage(msg)
+
 
     def run(self):
         """Run the trial, ensuring phase_end is called."""
