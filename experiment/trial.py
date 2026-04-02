@@ -447,7 +447,7 @@ class ExtinctionTrial(Trial):
     def log_phase_info(self, phase=None):
         super().log_phase_info(phase)
         if self.eyetracker_on:  # send msg to eyetracker
-            msg = f'trial {self.trial_nr} parameter episode_nr: {self.parameters["episode_nr"]}'
+            msg = f'trial {self.trial_nr} parameter episode_nr : {self.parameters["episode_nr"]}'
             self.session.tracker.sendMessage(msg)
 
 
