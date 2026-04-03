@@ -287,7 +287,7 @@ class ExtinctionTrial(Trial):
             min_val=0, max_val=10, start_val=5, step=1,
             label_left='Not at all distressed',
             label_right='Very distressed',
-            question='DISTRESS?',
+            question='How distressed do you feel?',
             left_key='left', right_key='right'       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
         )
 
