@@ -446,6 +446,9 @@ class ExtinctionSession(PylinkEyetrackerSession):
                     text=block_text,
                     duration = 15  # 15 seconds
                 )
+                # calibrate tracker again after break, if applicable
+                if self.eyetracker_on:
+                    self.calibrate_eyetracker()
 
 
             for trial in block_trials:
