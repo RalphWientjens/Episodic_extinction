@@ -447,13 +447,12 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 block_text = self.instructions[f"session_{self.sess}"]["between_blocks"][0].format(block=block_idx)
                 self.show_text_screen(
                     text=block_text, 
-                    duration = 75  # 75 seconds
+                    duration = self.break_duration  # break duration in seconds
                 )
                 block_text = self.instructions[f"session_{self.sess}"]["end of break"][0].format(block=block_idx)
                 self.show_text_screen(
                     text=block_text,
-
-                    duration = 15  # 15 seconds
+                    duration = self.get_ready_duration  # get ready duration in seconds
                 )
                 # calibrate tracker again after break, if applicable
                 if self.eyetracker_on:
