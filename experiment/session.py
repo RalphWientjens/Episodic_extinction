@@ -186,6 +186,13 @@ class ExtinctionSession(PylinkEyetrackerSession):
         3: 1,
         }
 
+        self.break_duration = 75  # default break duration in seconds, can be overridden by instructions
+        self.get_ready_duration = 15  # default get ready duration in seconds, can be overridden by instructions
+        
+        if self.test_mode:
+            self.break_duration = 10  # shorter break duration in test mode
+            self.get_ready_duration = 5  # shorter get ready duration in test mode
+
         try:
             self.blocks = self.session_to_blocks[self.sess]
         except KeyError:
@@ -377,6 +384,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
             self.trials_by_block.append(block_trials)
 
+
     def run(self):
         """Run the experimental session."""
 
@@ -438,12 +446,13 @@ class ExtinctionSession(PylinkEyetrackerSession):
             if block_idx > 0:
                 block_text = self.instructions[f"session_{self.sess}"]["between_blocks"][0].format(block=block_idx)
                 self.show_text_screen(
-                    text=block_text,
+                    text=block_text, 
                     duration = 75  # 75 seconds
                 )
                 block_text = self.instructions[f"session_{self.sess}"]["end of break"][0].format(block=block_idx)
                 self.show_text_screen(
                     text=block_text,
+
                     duration = 15  # 15 seconds
                 )
                 # calibrate tracker again after break, if applicable
