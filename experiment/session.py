@@ -290,7 +290,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 duration = random.randint(lo,hi)
 
             if self.test_mode:
-                duration *= 0.1  # speed up for testing
+                duration *= 0.01  # speed up for testing
 
             phase_names.append(draw_name)
             phase_durations.append(duration)
@@ -449,10 +449,10 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 #     self.calibrate_eyetracker()
 
                 # other approach: stop and start the eyetracker, during calibration. Still to test!
-                # if self.eyetracker_on:
-                #     self.stop_recording_eyetracker()
-                #     self.calibrate_eyetracker()
-                #     self.start_recording_eyetracker()
+                if self.eyetracker_on:
+                    self.stop_recording_eyetracker()
+                    self.calibrate_eyetracker()
+                    self.start_recording_eyetracker()
                 
                 block_text = self.instructions[f"session_{self.sess}"]["end of break"][0].format(block=block_idx)
                 self.show_text_screen(
