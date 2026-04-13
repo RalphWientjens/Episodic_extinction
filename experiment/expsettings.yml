@@ -49,9 +49,10 @@ eyetracker:
         enable_automatic_calibration: YES
         automatic_calibration_pacing: 1000
         file_event_filter: "LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT"
-        file_sample_data: "LEFT,RIGHT,GAZE,GAZERES,HREF,RAW,AREA,STATUS,BUTTON,INPUT"
+        # file_sample_data: "LEFT,RIGHT,GAZE,GAZERES,HREF,RAW,AREA,STATUS,BUTTON,INPUT" # GIVES ERROR?
         link_event_filter: "LEFT,RIGHT,FIXATION,SACCADE,BLINK,BUTTON,MESSAGE,INPUT"
         link_sample_data: "LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS,INPUT"
+        
 
 # mri:
 #     TR: 1.6  # seconds between volume acquisitions
