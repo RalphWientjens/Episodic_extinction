@@ -35,7 +35,18 @@ mouse:
     visible: False
 
 eyetracker:
-    model : eyelink
+    model: eyelink
+    address: '100.1.1.1'
+    dot_size: 0.1
+    options:
+        calibration_type: HV5
+        sample_rate: 1000
+        pupil_size_diameter: YES
+        pupil_data_type: RAW_AUTOSLIP      # ellipse pupil tracking
+        file_event_filter: LEFT, RIGHT, FIXATION, SACCADE, BLINK, MESSAGE, BUTTON, INPUT
+        file_sample_data: GAZE, HREF, RAW, AREA, BUTTON, INPUT, STATUS
+        link_event_filter: LEFT, RIGHT, FIXATION, SACCADE, BLINK, MESSAGE, BUTTON, INPUT
+        link_sample_data: GAZE, HREF, RAW, AREA, BUTTON, INPUT, STATUS
 
 # mri:
 #     TR: 1.6  # seconds between volume acquisitions
