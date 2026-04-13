@@ -445,8 +445,8 @@ class ExtinctionSession(PylinkEyetrackerSession):
                     duration = self.break_duration  # break duration in seconds
                 )
                 # calibrate tracker again after break, if applicable
-                if self.eyetracker_on:
-                    self.calibrate_eyetracker()
+                # if self.eyetracker_on:
+                #     self.calibrate_eyetracker()
 
                 # other approach: stop and start the eyetracker, during calibration. Still to test!
                 # if self.eyetracker_on:
