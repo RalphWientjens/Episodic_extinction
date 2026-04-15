@@ -187,7 +187,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
         }
 
         self.break_duration = 75  # default break duration in seconds, can be overridden by instructions
-        self.get_ready_duration = 15  # default get ready duration in seconds, can be overridden by instructions
+        self.get_ready_duration = 5  # default get ready duration in seconds, can be overridden by instructions
         
         if self.test_mode:
             self.break_duration = 10  # shorter break duration in test mode
