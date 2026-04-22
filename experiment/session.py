@@ -359,7 +359,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
             phase_durations = [4, random.randint(5,7)]  # US: 4s, fixcross: 5-7s
             
             if self.test_mode:
-                phase_durations = [d * 0.05 for d in phase_durations]
+                phase_durations = [d * 0.01 for d in phase_durations]
             
             # Create parameters dict
             params = {
@@ -464,7 +464,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
             self.show_text_screen(
                 text = self.instructions["session_1"]["US_prepare"][0],
-                duration = 5  # 5 seconds
+                duration = 3  # 5 seconds
             )
             
             self.start_experiment()

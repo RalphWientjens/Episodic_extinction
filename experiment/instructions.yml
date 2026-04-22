@@ -9,10 +9,20 @@ session_1:
 
       Press SPACE to continue to the instructions.
     - |
-      During the first phase of this experiment, you will see several combinations of images and sounds.
+      During the first phase of this experiment, you will see several images be presented on the screen, one after another.
+
+      The content of these images is either a NEUTRAL or an NEGATIVE scene. The images are accompanied by a MATCHING SOUND that will be played through the headphones. 
+      When these image-sound combinations are shown, you are supposed to look at and attend to these images and TAKE IN THE CONTENT of the images.
+
+      There is a fixation cross in the middle of the screen, please keep your focus on this cross for the whole duration of this block.  
+
+
+      Press SPACE to continue.
+    - |
+      During the second phase of this experiment, you will see several combinations of images and sounds.
 
       Each time, TWO pictures will appear one after the other. The content of the FIRST picture is always a NEUTRAL object. 
-      The SECOND picture is either a NEUTRAL or an NEGATIVE scene. This second picture is accompanied by a matching sound that will be played through the headphones. 
+      The SECOND picture is either a NEUTRAL or an NEGATIVE scene. This second picture is accompanied by a matching sound that will be played through the headphones. This will be one of the image-sound combinations that you saw in the first block.
 
       From now on, we will refer to the first neutral object picture as the CUE, and the second picture of a neutral or negative scene, including the sound, as the OUTCOME.  
 
@@ -42,14 +52,14 @@ session_1:
 
       press SPACE to continue.
     - | 
-      In total there are three rounds, so you will get to see every event three times in total.
+      In total there are three imagination rounds, so you will get to see every event three times in total.
 
-      In between each round, there will be a short break for you to relax. Please DON'T move too much, as you are attached to wires.
+      In between each imagination round, there will be a short break for you to relax. Please DON'T move too much, as you are attached to wires.
 
 
       Press SPACE to continue.
     - | 
-      In the final round, after each picture pair, another scale will appear.
+      In the final imagination round, after each picture pair, another scale will appear.
       
       On this scale, you should rate to what extent you feel like you have succeeded in creating a COHERENT story with the cue-outcome pairs. 
       You should rate to what extent you were able to MENTALLY LINK all the pictures and the sound into ONE SINGLE story. 
@@ -83,13 +93,12 @@ session_1:
       During the task, please DO NOT look away, close your eyes or take off the headphones.
 
       There will be a FIXATION CROSS in the MIDDLE of the screen for you to focus on during the imagination task.
-      Also during the distress scale, please KEEP LOOKING at the middle of the screen! 
+      Also during the distress scales, please KEEP LOOKING at the middle of the screen! 
 
 
       Press SPACE to continue.
     - |
-      You will start with two practice trials.
-      If you have any questions after the practice, please let the experimenter know.
+      You will start with a first round of image-sound combinations. Please PAY CLOSE ATTENTION to these images and  TAKE IN THEIR CONTENT.
 
       We will start with calibrating the eye-tracker.
 
@@ -108,12 +117,18 @@ session_1:
     - | 
       The pictures will come in a few seconds.
       
-      Get ready to focus!. 
+      Get ready to focus!
 
   practice_start:
     - | 
-      There will now be two practice episodes with scales.
+      There will now be two practice episodes with a cue and an outcome, and the scales.
 
+      Please remember: Try to IMAGINE a VIVID story where you play a CENTRAL role, and when looking at the cue, please rate HOW DISTRESSED you feel.
+      Use the left and right arrow to indicate how DISTRESSED you feel within the context of this experiment from NOT AT ALL DISTRESSED on the left to VERY DISTRESSED on the right.
+
+      In the last block (and during the practice trials), there will also be a COHERENCE scale. 
+
+      If you have any questions after the practice pairs, please let the experimenter know.
 
       Press SPACE to start the practice episodes.
     
