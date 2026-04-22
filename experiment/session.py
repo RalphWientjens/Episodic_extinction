@@ -290,7 +290,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 duration = random.randint(lo,hi)
 
             if self.test_mode:
-                duration *= 0.01  # speed up for testing
+                duration *= 0.05  # speed up for testing
 
             phase_names.append(draw_name)
             phase_durations.append(duration)
@@ -332,6 +332,57 @@ class ExtinctionSession(PylinkEyetrackerSession):
             practice_trials.append(trial)
 
         return practice_trials
+
+    def create_us_trials(self):
+        """Create a block of US trials, prior to session 1 only.
+        
+        Presents each unique US stimulus followed by a fixation cross.
+        """
+        us_trials = []
+        
+        # Randomize order uniquely per block
+        randomized_stims = pseudorandomize_stimset(
+            self.stimset,
+            seed=None
+        )
+
+        # Get unique US stimuli from the stimset
+        unique_us = randomized_stims['US'].unique()
+        us_sounds = randomized_stims.groupby('US')['US_sound'].first()
+        
+        phase_names = ['US', 'fixcross']
+        
+        for trial_nr, us_stim in enumerate(unique_us):
+            us_sound = us_sounds[us_stim]
+            
+            # Set durations for habituation block
+            phase_durations = [4, random.randint(5,7)]  # US: 4s, fixcross: 5-7s
+            
+            if self.test_mode:
+                phase_durations = [d * 0.05 for d in phase_durations]
+            
+            # Create parameters dict
+            params = {
+                'US': us_stim,
+                'US_sound': us_sound,
+                'CS': '',  # Not used in habituation
+                'block': 0,  # habituation block
+                'episode_nr': trial_nr + 1,
+                'condition': 0,
+                'valence': 0,
+            }
+            
+            trial = ExtinctionTrial(
+                session=self,
+                phase_names=phase_names,
+                phase_durations=phase_durations,
+                trial_nr=trial_nr,
+                parameters=params,
+            )
+            
+            us_trials.append(trial)
+        
+        return us_trials
 
     def create_trials(self):
         """Create practice and main trials for the session."""
@@ -385,6 +436,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
             self.trials_by_block.append(block_trials)
 
 
+
     def run(self):
         """Run the experimental session."""
 
@@ -404,14 +456,28 @@ class ExtinctionSession(PylinkEyetrackerSession):
             # Start recording
             self.start_recording_eyetracker()
 
+        # US habituation block for session 1 only (BEFORE practice)
+        if self.sess == 1:
+            self.show_text_screen(
+                self.instructions["session_1"]["US_block"][0]
+            )
+
+            self.show_text_screen(
+                text = self.instructions["session_1"]["US_prepare"][0],
+                duration = 5  # 5 seconds
+            )
+            
+            self.start_experiment()
+            
+            us_trials = self.create_us_trials()
+            for trial in us_trials:
+                trial.run()
+
         # practice trials for session 1 only
         if self.sess == 1:
             self.show_text_screen(
                 self.instructions["session_1"]["practice_start"][0]
             )
-
-            # start experiment timing for session 1
-            self.start_experiment()
 
             for trial in self.practice_trials:
                 trial.run()

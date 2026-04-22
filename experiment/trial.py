@@ -255,17 +255,21 @@ class ExtinctionTrial(Trial):
         self.US = self.parameters["US"]
         self.US_sound_file = self.parameters["US_sound"]
 
-        self.CS_img = visual.ImageStim(
-            self.session.win,
-            # image=os.path.join(stim_dir, "CS_equalized", self.CS),  #for equalized luminance images
-            image=os.path.join(stim_dir, "CS", self.CS),
-            size=(800, 800)
-        )
+        if parameters.get('CS', ''):
+            self.CS_img = visual.ImageStim(
+                self.session.win,
+                # image=os.path.join(stim_dir, "CS_equalized", self.CS),  #for equalized luminance images
+                image=os.path.join(stim_dir, "CS", self.CS),
+                size=(1000, 1000)
+            )
+        else:
+            self.CS_img = None  # No CS for this trial
+
         self.US_img = visual.ImageStim(
             self.session.win,
             # image=os.path.join(stim_dir, "US_equalized", self.US), #for equalized luminance images
             image=os.path.join(stim_dir, "US", self.US),
-            size=(800, 800)
+            size=(1000, 1000)
         )
 
         # Fixation cross

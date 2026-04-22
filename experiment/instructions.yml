@@ -96,10 +96,23 @@ session_1:
 
       Press SPACE to continue, then follow the instructions of the experimenter.
   
+  US_block:
+    - | 
+      You will now see various images with accompanying sounds. Some of the images and sounds can be aversive.
+      
+      Please PAY CLOSE ATTENTION to the images. Please KEEP LOOKING at the cross in the middle of the screen.
+
+      Press SPACE to continue.
+    
+  US_prepare:
+    - | 
+      The pictures will come in a few seconds.
+      
+      Get ready to focus!. 
 
   practice_start:
     - | 
-      There will first be two practice episodes.
+      There will now be two practice episodes with scales.
 
 
       Press SPACE to start the practice episodes.
