@@ -75,46 +75,55 @@ def resolve_condition_label(sess: int, condition: int) -> str:
 
 # functions for randomisation of trials
 # checking function for two conditions and three valence
-def is_valid_sequence(df):
-    # No more than 2 identical conditions in a row
-    for i in range(len(df) - 2):
+def is_valid_sequence(pool_df):
+    """Check if a trial pool has no more than 2 consecutive episodes of the same valence."""
+    for i in range(len(pool_df) - 2):
         if (
-            df["condition"].iloc[i]
-            == df["condition"].iloc[i + 1]
-            == df["condition"].iloc[i + 2]
+            pool_df["valence"].iloc[i]
+            == pool_df["valence"].iloc[i + 1]
+            == pool_df["valence"].iloc[i + 2]
         ):
             return False
-
-    # No more than 3 identical valences in a row
-    for i in range(len(df) - 3):
-        if (
-            df["valence"].iloc[i]
-            == df["valence"].iloc[i + 1]
-            == df["valence"].iloc[i + 2]
-            == df["valence"].iloc[i + 3]
-        ):
-            return False
-
     return True
 
-# in case we want reproducible seeds per subject/session
-# seed = hash(f"{self.output_str}_block{block}") % (2**32)
 
-#Create psuedorandom stimset order
 def pseudorandomize_stimset(stimset, max_attempts=10000, seed=None):
-
+    """
+    Randomize stimset grouped by trial pools (1-6).
+    Within each block:
+    - Trial pool 1 comes first, then 2, then 3, etc.
+    - Within each trial pool, episodes are randomized
+    - Constraint: no more than 2 consecutive episodes of the same valence
+    """
     if seed is not None:
         random.seed(seed)
 
-    for _ in range(max_attempts):
-        shuffled = stimset.sample(frac=1).reset_index(drop=True)
-
-        if is_valid_sequence(shuffled):
-            shuffled = shuffled.copy()
-            shuffled["presentation_order"] = range(1, len(shuffled) + 1)
-            return shuffled
-
-    raise RuntimeError("Could not generate a valid sequence.")
+    # Group by trial pool
+    trial_pools = {trial_num: group.reset_index(drop=True) 
+                   for trial_num, group in stimset.groupby('trial', sort=True)}
+    
+    result_rows = []
+    
+    # Process each trial pool in order (1, 2, 3, 4, 5, 6)
+    for trial_num in sorted(trial_pools.keys()):
+        pool_df = trial_pools[trial_num].copy()
+        
+        # Randomize within the pool until valid
+        for attempt in range(max_attempts):
+            shuffled_pool = pool_df.sample(frac=1).reset_index(drop=True)
+            
+            if is_valid_sequence(shuffled_pool):
+                result_rows.append(shuffled_pool)
+                break
+        else:
+            raise RuntimeError(f"Could not generate valid sequence for trial pool {trial_num} after {max_attempts} attempts")
+    
+    # Concatenate all pools in order
+    final_df = pd.concat(result_rows, ignore_index=True)
+    final_df = final_df.copy()
+    final_df["presentation_order"] = range(1, len(final_df) + 1)
+    
+    return final_df
 
 
 class ExtinctionSession(PylinkEyetrackerSession):
