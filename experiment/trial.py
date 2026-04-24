@@ -260,7 +260,9 @@ class ExtinctionTrial(Trial):
                 self.session.win,
                 # image=os.path.join(stim_dir, "CS_equalized", self.CS),  #for equalized luminance images
                 image=os.path.join(stim_dir, "CS", self.CS),
-                size=(800, 800)
+                size=(800, 800),
+                TexRes=512,
+                interpolate=True
             )
         else:
             self.CS_img = None  # No CS for this trial
@@ -269,7 +271,9 @@ class ExtinctionTrial(Trial):
             self.session.win,
             # image=os.path.join(stim_dir, "US_equalized", self.US), #for equalized luminance images
             image=os.path.join(stim_dir, "US", self.US),
-            size=(800, 800)
+            size=(800, 800),
+            TexRes=512,
+            interpolate=True
         )
 
         # Fixation cross
