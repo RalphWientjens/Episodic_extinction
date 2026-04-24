@@ -261,7 +261,7 @@ class ExtinctionTrial(Trial):
                 # image=os.path.join(stim_dir, "CS_equalized", self.CS),  #for equalized luminance images
                 image=os.path.join(stim_dir, "CS", self.CS),
                 size=(800, 800),
-                TexRes=512,
+                texRes=512,
                 interpolate=True
             )
         else:
@@ -272,7 +272,7 @@ class ExtinctionTrial(Trial):
             # image=os.path.join(stim_dir, "US_equalized", self.US), #for equalized luminance images
             image=os.path.join(stim_dir, "US", self.US),
             size=(800, 800),
-            TexRes=512,
+            texRes=512,
             interpolate=True
         )
 
