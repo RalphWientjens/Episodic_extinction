@@ -300,6 +300,10 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
             if self.test_mode:
                 duration *= 0.05  # speed up for testing
+        
+            # Round to nearest TR for MRI synchronization
+            TR = self.settings.get("mri", {}).get("TR", 2)
+            duration = round(duration / TR) * TR
 
             phase_names.append(draw_name)
             phase_durations.append(duration)
@@ -464,6 +468,14 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
             # Start recording
             self.start_recording_eyetracker()
+
+        # Wait for first TR before starting experiment (if in scanner)
+        self.show_text_screen(
+            text = "Waiting for scanner...",
+            # set wait keys to '5' if mri simulation is true, othewise wait for TR (i.e. none and self.wait_for_sync())
+            wait_keys = ['5'] if self.settings["mri"]["simulation"] else None
+        )
+        self.wait_for_sync()
 
         # US habituation block for session 1 only (BEFORE practice)
         if self.sess == 1:

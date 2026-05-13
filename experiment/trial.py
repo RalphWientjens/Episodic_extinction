@@ -296,7 +296,7 @@ class ExtinctionTrial(Trial):
             label_left='Not at all distressed',
             label_right='Very distressed',
             question='How distressed do you feel?',
-            left_key='left', right_key='right'       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
+            left_key='b', right_key='y'       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
         )
 
         self.coherence_scale = KeyboardScale(
@@ -307,7 +307,7 @@ class ExtinctionTrial(Trial):
             label_left='Not at all coherent',
             label_right='Very coherent',
             question='How coherent was your story?',
-            left_key='left', right_key='right'
+            left_key='b', right_key='y'
         )
         # self.phase = None  # Initialize phase to avoid AttributeError
         # self.last_phase = None
