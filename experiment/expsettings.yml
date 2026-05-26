@@ -30,7 +30,7 @@ test_settings:
     eyetracker_on: False
     serial_markers_on: False
     parallel_markers_on: False
-    mri_on: False
+    mri_on: True
 
 mouse:
     visible: False

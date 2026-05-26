@@ -192,6 +192,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
         self.version = version  # Store version number
         self.test_mode = self.settings["test_settings"]["test_mode_on"]  # Store test mode flag
         self.mri_on = self.settings["test_settings"]["mri_on"] 
+        self.TR = self.settings["mri"]["TR"]
 
         # Validate session and block combination
         self.session_to_blocks = {
@@ -202,6 +203,10 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         if self.sess not in self.session_to_blocks:
             print(f"Error: Session {self.sess} is not defined. Valid sessions are: {list(self.session_to_blocks.keys())}")
+            sys.exit(1)
+        
+        if self.block is None:
+            print(f"Error: Block number must be specified for session {self.sess}. Valid blocks are 1-{max_blocks}")
             sys.exit(1)
 
         max_blocks = self.session_to_blocks[self.sess]
@@ -280,13 +285,22 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
     def is_last_block(self):
         """Determine if this is the last block of the session, based on session and block number."""
-        # blocks per session
-        self.session_to_blocks = {
-        1: 3,
-        2: 4,
-        3: 1,
-        }
         return self.block == self.session_to_blocks.get(self.sess)
+    
+    def jittered_iti(self, fixed_duration, min_iti=2, max_iti=8, TR=1.6):
+        """Return an ITI that brings total trial duration to a TR multiple."""
+        total_min = fixed_duration + min_iti
+        total_max = fixed_duration + max_iti
+        
+        # All TR multiples in the valid range
+        n_min = int(np.ceil(total_min / TR))
+        n_max = int(np.floor(total_max / TR))
+        
+        if n_min > n_max:
+            raise ValueError(f"No TR multiple in ITI range [{min_iti}, {max_iti}] for fixed duration {fixed_duration}")
+        
+        chosen_n = random.randint(n_min, n_max)
+        return chosen_n * TR - fixed_duration
 
 
     def get_phases_for_trial(self, condition_label: str, is_last_block: bool):
@@ -311,23 +325,34 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         phase_names = []
         phase_durations = []
+        fixed_total = 0.0
+
+        ITI_PHASES = {"fixcross", "fixcross_long"}
 
         for phase_key in base_phases:
             draw_name, duration = PHASES[phase_key]
 
-            if isinstance(duration, tuple):
-                lo, hi = duration
-                duration = random.randint(lo,hi)
+            if phase_key in ITI_PHASES:
+                # For ITI phases, we want to jitter the duration to be a multiple of TR
+                # defer - compute after fixed_total is known
+                phase_names.append(draw_name)
+                phase_durations.append(None)  # placeholder, will compute after loop
+            else: 
+                if self.test_mode:
+                    duration *= 0.05  # speed up for testing
+                phase_names.append(draw_name)
+                phase_durations.append(duration)
+                fixed_total += duration
+            
+        # Now resolve ITI placeholders
+        _, (lo, hi) = PHASES["fixcross_long"]  if not is_last_block else PHASES["fixcross"]
 
-            if self.test_mode:
-                duration *= 0.05  # speed up for testing
+        iti = self.jittered_iti(fixed_duration=fixed_total, min_iti=lo, max_iti=hi, TR=self.TR)
+
+        if self.test_mode:
+            iti *= 0.05  # speed up for testing
         
-            # Round to nearest TR for MRI synchronization
-            # TR = self.settings.get("mri", {}).get("TR", 2)
-            # duration = round(duration / TR) * TR
-
-            phase_names.append(draw_name)
-            phase_durations.append(duration)
+        phase_durations = [iti if d is None else d for d in phase_durations]
 
         return dict(names=phase_names, durations=phase_durations)
     
@@ -507,17 +532,19 @@ class ExtinctionSession(PylinkEyetrackerSession):
             # Start recording
             self.start_recording_eyetracker()
 
-        if self.settings["mri"]["simulate"]:
+        if self.mri_on:
+            # In MRI sessions, instructions are given outside the scanner, so we skip directly to waiting for the scanner.
             self.show_text_screen(
                 text="Waiting for scanner...",
-                wait_keys=None   # just flash the screen, wait_for_sync() does the actual waiting
+                wait_keys=None,
+                duration=0.1  # just flash the screen, don't wait for keypress
             )
-            self.wait_for_sync()
-        else:
-            self.show_text_screen(
-                text="Waiting for scanner...",
-                wait_keys=['t']
-            )
+            self.wait_for_sync()  # this does the actual waiting for the trigger
+            # else:
+            #     self.show_text_screen(
+            #         text="Waiting for scanner...",
+            #         wait_keys=['t']
+            #     )
 
         # US habituation block for session 1 only (BEFORE practice)
         if self.sess == 1 and self.block == 1:            
