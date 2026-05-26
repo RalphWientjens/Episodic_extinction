@@ -435,19 +435,22 @@ class ExtinctionSession(PylinkEyetrackerSession):
         # Get unique US stimuli from the stimset
         unique_us = randomized_stims['US'].unique()
         us_sounds = randomized_stims.groupby('US')['US_sound'].first()
-        episode_nrs = randomized_stims.groupby('US')['episode_nr'].first()
+        us_episode_nrs = randomized_stims.groupby('US')['episode_nr'].first()
         
         phase_names = ['US', 'fixcross']
         
         for trial_nr, us_stim in enumerate(unique_us):
             us_sound = us_sounds[us_stim]
-            episode_nr = episode_nrs[us_stim]
+            episode_nr = us_episode_nrs[us_stim]
             
             # Set durations for habituation block
-            phase_durations = [4, random.randint(5,7)]  # US: 4s, fixcross: 5-7s
+            us_duration = 4.0
+            iti = self.jittered_iti(fixed_duration=us_duration, min_iti=5, max_iti=7, TR=self.TR)
             
             if self.test_mode:
-                phase_durations = [d * 0.01 for d in phase_durations]
+                phase_durations = [us_duration * 0.01, iti * 0.01]
+            else:
+                phase_durations = [us_duration, iti]
             
             # Create parameters dict
             params = {
