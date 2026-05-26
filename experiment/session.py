@@ -358,11 +358,13 @@ class ExtinctionSession(PylinkEyetrackerSession):
         # Get unique US stimuli from the stimset
         unique_us = randomized_stims['US'].unique()
         us_sounds = randomized_stims.groupby('US')['US_sound'].first()
+        us_episode_nrs = randomized_stims.groupby('US')['episode_nr'].first()
         
         phase_names = ['US', 'fixcross']
         
         for trial_nr, us_stim in enumerate(unique_us):
             us_sound = us_sounds[us_stim]
+            episode_nr = us_episode_nrs[us_stim]
             
             # Set durations for habituation block
             phase_durations = [4, random.randint(5,7)]  # US: 4s, fixcross: 5-7s
@@ -375,10 +377,10 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 'US': us_stim,
                 'US_sound': us_sound,
                 'CS': '',  # Not used in habituation
-                'block': 0,  # habituation block
-                'episode_nr': trial_nr + 1,
+                'block': -1,  # habituation block
                 'condition': 0,
                 'valence': 0,
+                "episode_nr": episode_nr,
             }
             
             trial = ExtinctionTrial(
