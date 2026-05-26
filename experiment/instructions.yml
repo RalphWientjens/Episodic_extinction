@@ -121,25 +121,15 @@ session_1:
 
   practice_start:
     - | 
-      There will now be two practice episodes with a cue and an outcome, and the scales.
+      There will be TWO PRACTICE episodes with a cue and an outcome, and BOTH the scales.
 
-      Please remember: Try to IMAGINE a VIVID story where you play a CENTRAL role, and when looking at the cue, please rate HOW DISTRESSED you feel.
-      Use the left and right arrow to indicate how DISTRESSED you feel within the context of this experiment from NOT AT ALL DISTRESSED on the left to VERY DISTRESSED on the right.
-
-      In the last block (and during the practice trials), there will also be a COHERENCE scale. 
-
-      If you have any questions after the practice pairs, please let the experimenter know.
-
-      Press SPACE to start the practice episodes.
+      IMAGINE a VIVID story and please rate HOW DISTRESSED you feel.
     
   practice_end:
     - |
       End of the practice episodes.
 
-      If you have any questions, ask the experimenter now.
-
-
-      If you are ready, press SPACE to start the experiment.
+      The MAIN episodes will come now!
 
 
   between_blocks:

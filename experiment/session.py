@@ -30,6 +30,7 @@ PHASES = {
     "reinforced_EXT":   ("fixcross", 4.0),  # duration defined per phase
     "fixcross":         ("fixcross", (4,8)),
     "fixcross_long":    ("fixcross", (8, 12)),
+    "dummy_fixcross":   ("fixcross", 16),  # for dummy TRs at the start of the session, to be removed in data processing
 }
 
 SESSION_CONFIG = {
@@ -138,13 +139,15 @@ class ExtinctionSession(PylinkEyetrackerSession):
                  output_dir=None,
                  settings_file="expsettings.yml",
                  sess=None,
+                 block=None,
                  version=None,
                  OS="windows",
                  test_mode=False,
                  blocks=3,
                  enable_eyetracker=False,
                  enable_serial_markers=False,
-                 enable_parallel_markers=False):
+                 enable_parallel_markers=False,
+                 enable_mri=False):
         """
         Initialize ExtinctionSession.
 
@@ -185,15 +188,28 @@ class ExtinctionSession(PylinkEyetrackerSession):
             self.parallelPort = parallel.ParallelPort(address='0x3FF8')
 
         self.sess = sess  # Store session number
+        self.block = block  # Store run/block number
         self.version = version  # Store version number
         self.test_mode = self.settings["test_settings"]["test_mode_on"]  # Store test mode flag
+        self.mri_on = self.settings["test_settings"]["mri_on"] 
 
-        # blocks per session
+        # Validate session and block combination
         self.session_to_blocks = {
-        1: 3,
-        2: 4,
-        3: 1,
+            1: 3,
+            2: 4,
+            3: 1,
         }
+
+        if self.sess not in self.session_to_blocks:
+            print(f"Error: Session {self.sess} is not defined. Valid sessions are: {list(self.session_to_blocks.keys())}")
+            sys.exit(1)
+
+        max_blocks = self.session_to_blocks[self.sess]
+        if self.block < 1 or self.block > max_blocks:
+            print(f"Error: Block {self.block} is invalid for session {self.sess}. Valid blocks are 1-{max_blocks}")
+            sys.exit(1)
+
+        print(f"Starting session {self.sess}, block {self.block}")
 
         self.break_duration = 75  # default break duration in seconds, can be overridden by instructions
         self.get_ready_duration = 5  # default get ready duration in seconds, can be overridden by instructions
@@ -201,12 +217,6 @@ class ExtinctionSession(PylinkEyetrackerSession):
         if self.test_mode:
             self.break_duration = 10  # shorter break duration in test mode
             self.get_ready_duration = 5  # shorter get ready duration in test mode
-
-        try:
-            self.blocks = self.session_to_blocks[self.sess]
-        except KeyError:
-            print(f"Error: Session {self.sess} is not defined. Please provide a valid session number (1, 2, or 3).")
-            sys.exit(1)
 
         instructions_path = os.path.join(
             os.path.dirname(__file__),
@@ -227,12 +237,6 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         if self.practice_stimset.empty:
             raise RuntimeError("Practice stimset contains no trials.")
-
-        # stimset_path = os.path.join(
-        #     os.path.dirname(__file__),
-        #     "stimuli_files",
-        #     "stimuli_list_test.tsv"
-        # )
 
         stimset_path = os.path.join(
             os.path.dirname(__file__),
@@ -274,9 +278,27 @@ class ExtinctionSession(PylinkEyetrackerSession):
         for text in texts:
             self.show_text_screen(text.format(**format_kwargs))
 
+    def is_last_block(self):
+        """Determine if this is the last block of the session, based on session and block number."""
+        # blocks per session
+        self.session_to_blocks = {
+        1: 3,
+        2: 4,
+        3: 1,
+        }
+        return self.block == self.session_to_blocks.get(self.sess)
+
 
     def get_phases_for_trial(self, condition_label: str, is_last_block: bool):
-        """Get phase names and durations for a trial, based off the session and condition."""
+        """Get phase names and durations for a trial, based off the session and condition.
+    
+        Parameters
+        ----------
+        condition_label : str
+            The condition label (e.g., 'base', 'CC', 'EXT')
+        is_last_block : bool
+            Whether this is the last block of the session (determines phase structure)
+        """
         cfg = SESSION_CONFIG[self.sess]
 
         base_phases = cfg[condition_label].copy()
@@ -284,7 +306,6 @@ class ExtinctionSession(PylinkEyetrackerSession):
         if is_last_block and cfg.get("coherence_last_block", False):
             base_phases.append("coherence")
             base_phases.append("fixcross")
-
         else:
             base_phases.append("fixcross_long")
 
@@ -302,13 +323,40 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 duration *= 0.05  # speed up for testing
         
             # Round to nearest TR for MRI synchronization
-            TR = self.settings.get("mri", {}).get("TR", 2)
-            duration = round(duration / TR) * TR
+            # TR = self.settings.get("mri", {}).get("TR", 2)
+            # duration = round(duration / TR) * TR
 
             phase_names.append(draw_name)
             phase_durations.append(duration)
 
         return dict(names=phase_names, durations=phase_durations)
+    
+    def create_dummy_trials(self, n_dummy=2):
+        """Create dummy trials with a fixed duration, to be presented at the start of the session for MRI synchronization."""
+        dummy_trials = []
+        phase_names = ["fixcross"]
+        phase_durations = [PHASES["dummy_fixcross"][1]]  # 16 seconds
+
+        for trial_nr in range(n_dummy):
+            trial = ExtinctionTrial(
+                session=self,
+                phase_names=phase_names,
+                phase_durations=phase_durations,
+                trial_nr=trial_nr,
+                parameters={"block": 0, 
+                            "practice": False, 
+                            "dummy": True,
+                            "CS": "",
+                            "US": "",
+                            "US_sound": "",
+                            "condition": 0,
+                            "valence": 0,
+                            "episode_nr": 0,
+                            },
+            )
+            dummy_trials.append(trial)
+
+        return dummy_trials
 
     def create_practice_trials(self):
         """Create practice trials for session 1 only."""
@@ -362,11 +410,13 @@ class ExtinctionSession(PylinkEyetrackerSession):
         # Get unique US stimuli from the stimset
         unique_us = randomized_stims['US'].unique()
         us_sounds = randomized_stims.groupby('US')['US_sound'].first()
+        episode_nrs = randomized_stims.groupby('US')['episode_nr'].first()
         
         phase_names = ['US', 'fixcross']
         
         for trial_nr, us_stim in enumerate(unique_us):
             us_sound = us_sounds[us_stim]
+            episode_nr = episode_nrs[us_stim]
             
             # Set durations for habituation block
             phase_durations = [4, random.randint(5,7)]  # US: 4s, fixcross: 5-7s
@@ -379,10 +429,10 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 'US': us_stim,
                 'US_sound': us_sound,
                 'CS': '',  # Not used in habituation
-                'block': 0,  # habituation block
-                'episode_nr': trial_nr + 1,
+                'block': -1,  # habituation block
                 'condition': 0,
                 'valence': 0,
+                'episode_nr': episode_nr,
             }
             
             trial = ExtinctionTrial(
@@ -407,60 +457,48 @@ class ExtinctionSession(PylinkEyetrackerSession):
             self.practice_trials = self.create_practice_trials()
             print(f"Created {len(self.practice_trials)} practice trials")
 
+        # main trials for a single block
+        self.trials = []
 
-        # main trials, by block
-        self.trials_by_block = []
+        is_last_block = self.is_last_block()
 
-        for block in range(self.blocks):
+        # Randomize order uniquely per block
+        randomized_stimset = pseudorandomize_stimset(
+            self.stimset,
+            seed=None
+        )
 
-            is_last_block = (block == self.blocks - 1)
+        for trial_nr, stim_row in randomized_stimset.iterrows():
+            params = stim_row.to_dict()
+            params["block"] = self.block
 
-            # Randomize order uniquely per block
-            randomized_stimset = pseudorandomize_stimset(
-                self.stimset,
-                seed=None
+            condition_value = int(stim_row["condition"])
+            condition_label = resolve_condition_label(self.sess, condition_value)
+
+            phases = self.get_phases_for_trial(
+                condition_label=condition_label,
+                is_last_block=is_last_block
             )
 
-            block_trials = []
+            trial = ExtinctionTrial(
+                session=self,
+                phase_names=phases["names"],
+                phase_durations=phases["durations"],
+                trial_nr=trial_nr,
+                parameters=params
+            )
 
-            for trial_nr, stim_row in randomized_stimset.iterrows():
-
-                params = stim_row.to_dict()
-                params["block"] = block + 1
-
-                condition_value = int(stim_row["condition"])
-                condition_label = resolve_condition_label(self.sess, condition_value)
-
-                phases = self.get_phases_for_trial(
-                    condition_label=condition_label,
-                    is_last_block=is_last_block
-                )
-
-                trial = ExtinctionTrial(
-                    session=self,
-                    phase_names=phases["names"],
-                    phase_durations=phases["durations"],
-                    trial_nr=trial_nr,
-                    parameters=params
-                )
-
-                block_trials.append(trial)
-
-            self.trials_by_block.append(block_trials)
-
+            self.trials.append(trial)
 
 
     def run(self):
-        """Run the experimental session."""
+        """Run the experimental session.
+        
+        In MRI sessions, there are no instructions. All instructions are given outside scanner"""
 
         # Create main trials
         self.create_trials()
-
-        # session instructions
-        session_key = f"session_{self.sess}"
-        self.show_instruction_sequence(
-            self.instructions[session_key]["before_session"]
-        )
+        dummy_trials = self.create_dummy_trials(n_dummy=2)
 
         # Tracker calibration
         if self.eyetracker_on:
@@ -469,87 +507,59 @@ class ExtinctionSession(PylinkEyetrackerSession):
             # Start recording
             self.start_recording_eyetracker()
 
-        # Wait for first TR before starting experiment (if in scanner)
-        self.show_text_screen(
-            text = "Waiting for scanner...",
-            # set wait keys to '5' if mri simulation is true, othewise wait for TR (i.e. none and self.wait_for_sync())
-            wait_keys = ['5'] if self.settings["mri"]["simulation"] else None
-        )
-        self.wait_for_sync()
+        if self.settings["mri"]["simulate"]:
+            self.show_text_screen(
+                text="Waiting for scanner...",
+                wait_keys=None   # just flash the screen, wait_for_sync() does the actual waiting
+            )
+            self.wait_for_sync()
+        else:
+            self.show_text_screen(
+                text="Waiting for scanner...",
+                wait_keys=['t']
+            )
 
         # US habituation block for session 1 only (BEFORE practice)
-        if self.sess == 1:
-            self.show_text_screen(
-                self.instructions["session_1"]["US_block"][0]
-            )
-
-            self.show_text_screen(
-                text = self.instructions["session_1"]["US_prepare"][0],
-                duration = 3  # 5 seconds
-            )
+        if self.sess == 1 and self.block == 1:            
+            self.start_experiment()        
+            dummy_trials[0].run()   # present first dummy trial for MRI synchronization, to be removed in data processing
             
-            self.start_experiment()
-            
+            # US block at the start of session 1
             us_trials = self.create_us_trials()
             for trial in us_trials:
                 trial.run()
 
-        # practice trials for session 1 only
-        if self.sess == 1:
+            # practice trials for session 1 only
             self.show_text_screen(
-                self.instructions["session_1"]["practice_start"][0]
+                self.instructions["session_1"]["practice_start"][0],
+                duration=5  # 5 seconds
             )
 
             for trial in self.practice_trials:
                 trial.run()
 
-            # Pause after practice
+            # indicate start of true experiment after practice, for session 1 only
             self.show_text_screen(
-                self.instructions["session_1"]["practice_end"][0]
-            )
-            # self.clock.reset()  # reset clock after practice
-
-        else:
-            self.show_instruction_sequence(
-                self.instructions[session_key]["Start instructions"]
+                self.instructions["session_1"]["practice_end"][0],
+                duration=5  # 5 seconds
             )
 
-            self.show_text_screen(
-                text = self.instructions["before_start"],
-                duration = 5  # 5 seconds
-            )
-            
-            #start experiment timing for sessions 2 and 3
+        else:            
+            #start experiment timing for blocks 2 and 3 of session 1 and sessions 2 and 3
             self.start_experiment()
+            dummy_trials[0].run()  # present first dummy trial for MRI synchronization, to be removed in data processing
 
-        for block_idx, block_trials in enumerate(self.trials_by_block):
-
-            # Between-block instructions (not before block 1)
-            if block_idx > 0:
-                block_text = self.instructions[f"session_{self.sess}"]["between_blocks"][0].format(block=block_idx)
-                self.show_text_screen(
-                    text=block_text, 
-                    duration = self.break_duration  # break duration in seconds
-                )
-                # calibrate tracker again after break, if applicable
-                # if self.eyetracker_on:
-                #     self.calibrate_eyetracker()
-
-                # other approach: stop and start the eyetracker, during calibration. Still to test!
-                if self.eyetracker_on:
-                    self.stop_recording_eyetracker()
-                    self.calibrate_eyetracker()
-                    self.start_recording_eyetracker()
-                
-                block_text = self.instructions[f"session_{self.sess}"]["end of break"][0].format(block=block_idx)
-                self.show_text_screen(
-                    text=block_text,
-                    duration = self.get_ready_duration  # get ready duration in seconds
-                )
-
-
-            for trial in block_trials:
+        for trial in self.trials:
+            trial.run()
+        
+        if self.sess == 3:
+            # Add US block at the end of session 3
+            us_trials = self.create_us_trials()
+            for trial in us_trials:
                 trial.run()
+        
+        # present second dummy trial for MRI synchronization, to be removed in data processing
+        dummy_trials[1].run()
 
         # End experiment (also stops eyetracking recording)
         self.close()

@@ -267,20 +267,26 @@ class ExtinctionTrial(Trial):
         else:
             self.CS_img = None  # No CS for this trial
 
-        self.US_img = visual.ImageStim(
-            self.session.win,
-            # image=os.path.join(stim_dir, "US_equalized", self.US), #for equalized luminance images
-            image=os.path.join(stim_dir, "US", self.US),
-            size=(800, 800),
-            texRes=512,
-            interpolate=True
-        )
+        if parameters.get('US', ''):
+            self.US_img = visual.ImageStim(
+                self.session.win,
+                # image=os.path.join(stim_dir, "US_equalized", self.US), #for equalized luminance images
+                image=os.path.join(stim_dir, "US", self.US),
+                size=(800, 800),
+                texRes=512,
+                interpolate=True
+            )
+        else:
+            self.US_img = None  # No US for this trial
 
         # Fixation cross
         self.fixation = visual.TextStim(self.session.win, text='+', height=50, color='black', font="Arial")
 
         # Sound
-        self.US_sound = sound.Sound(os.path.join(stim_dir, "USsounds", self.US_sound_file))
+        if parameters.get('US_sound', ''):
+            self.US_sound = sound.Sound(os.path.join(stim_dir, "USsounds", self.US_sound_file))
+        else:
+            self.US_sound = None  # No sound for this trial
 
         # ============================ Use keyboard scales instead =======================================
         # Position: near the bottom of the screen for distress (shown over CS),

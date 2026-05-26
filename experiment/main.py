@@ -15,10 +15,11 @@ datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 def main():
     subject = sys.argv[1]
     sess =  sys.argv[2]
-    version = sys.argv[3]
+    block = sys.argv[3]
+    version = sys.argv[4]
     # eyetracker_on = bool(sys.argv[4])
     
-    output_str= "sub-" + subject+'_ses-'+sess+"_v-"+version
+    output_str= "sub-" + subject+'_ses-'+sess+"_run-"+block+"_v-"+version
     
     output_dir = f'./logs/sub-{subject}/{output_str}'
     
@@ -33,6 +34,7 @@ def main():
         output_dir=output_dir, 
         settings_file=settings_file,
         sess=int(sess),
+        block=int(block), 
         version=version
         )
     ts.run()
