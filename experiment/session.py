@@ -356,11 +356,11 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         return dict(names=phase_names, durations=phase_durations)
     
-    def create_dummy_trials(self, n_dummy=2):
+    def create_dummy_trials(self, n_dummy=2, TR=1.6):
         """Create dummy trials with a fixed duration, to be presented at the start of the session for MRI synchronization."""
         dummy_trials = []
         phase_names = ["fixcross"]
-        phase_durations = [PHASES["dummy_fixcross"][1]]  # 16 seconds
+        phase_durations = [10 * TR]  # 16 seconds
 
         for trial_nr in range(n_dummy):
             trial = ExtinctionTrial(
@@ -526,7 +526,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         # Create main trials
         self.create_trials()
-        dummy_trials = self.create_dummy_trials(n_dummy=2)
+        dummy_trials = self.create_dummy_trials(n_dummy=2, TR=self.TR)
 
         # Tracker calibration
         if self.eyetracker_on:
@@ -535,19 +535,12 @@ class ExtinctionSession(PylinkEyetrackerSession):
             # Start recording
             self.start_recording_eyetracker()
 
+        # In MRI sessions, instructions are given outside the scanner, so we skip directly to waiting for the scanner.
         if self.mri_on:
-            # In MRI sessions, instructions are given outside the scanner, so we skip directly to waiting for the scanner.
             self.show_text_screen(
                 text="Waiting for scanner...",
-                wait_keys=None,
-                duration=0.1  # just flash the screen, don't wait for keypress
+                wait_keys=[self.settings['mri'].get('sync', 't')]
             )
-            self.wait_for_sync()  # this does the actual waiting for the trigger
-            # else:
-            #     self.show_text_screen(
-            #         text="Waiting for scanner...",
-            #         wait_keys=['t']
-            #     )
 
         # US habituation block for session 1 only (BEFORE practice)
         if self.sess == 1 and self.block == 1:            
@@ -562,7 +555,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
             # practice trials for session 1 only
             self.show_text_screen(
                 self.instructions["session_1"]["practice_start"][0],
-                duration=5  # 5 seconds
+                duration=6.4        # 4 TRs
             )
 
             for trial in self.practice_trials:
@@ -571,7 +564,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
             # indicate start of true experiment after practice, for session 1 only
             self.show_text_screen(
                 self.instructions["session_1"]["practice_end"][0],
-                duration=5  # 5 seconds
+                duration=6.4  # 4 TRs
             )
 
         else:            
