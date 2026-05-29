@@ -21,7 +21,7 @@ def main():
     
     output_str= "sub-" + subject+'_ses-'+sess+"_run-"+block+"_v-"+version
     
-    output_dir = f'./logs/sub-{subject}/{output_str}'
+    output_dir = f'./logs/sub-{subject}/ses-{sess}/run-{block}'
     
     if os.path.exists(output_dir):
         print("Warning: output directory already exists. Renaming to avoid overwriting.")
