@@ -576,6 +576,9 @@ class ExtinctionSession(PylinkEyetrackerSession):
         if self.sess == 1 and self.block == 9:
             self.start_experiment()        
             dummy_trials[0].run()   # present first dummy trial for MRI synchronization, to be removed in data processing
+
+            self.show_instruction_sequence(
+                self.instructions["session_1"]["before_session"],)
             
             # practice trials for session 1 only
             self.show_text_screen(
