@@ -558,28 +558,6 @@ class ExtinctionSession(PylinkEyetrackerSession):
             us_trials = self.create_us_trials()
             for trial in us_trials:
                 trial.run()
-
-        
-        if self.sess == 1 and self.block == 1:            
-            self.start_experiment()        
-            dummy_trials[0].run()   # present first dummy trial for MRI synchronization, to be removed in data processing
-
-
-            # practice trials for session 1 only
-            self.show_text_screen(
-                self.instructions["session_1"]["practice_start"][0],
-                duration=6.4        # 4 TRs
-            )
-
-            for trial in self.practice_trials:
-                trial.run()
-
-            # indicate start of true experiment after practice, for session 1 only
-            self.show_text_screen(
-                self.instructions["session_1"]["practice_end"][0],
-                # nonstop duration
-                duration=None
-            )
         
         # create separate block for practicing trials outside scanner (block 9)
         if self.sess == 1 and self.block == 9:
@@ -608,8 +586,14 @@ class ExtinctionSession(PylinkEyetrackerSession):
             self.start_experiment()
             dummy_trials[0].run()  # present first dummy trial for MRI synchronization, to be removed in data processing
 
-        for trial in self.trials:
-            trial.run()
+        # for all trials except block 0 and block 9 of session 1 and block 2 of session 3 (US block at the end), run the main trials as usual:
+        if not (
+            (self.sess == 1 and self.block == 0) or 
+            (self.sess == 1 and self.block == 9) or 
+            (self.sess == 3 and self.block == 2)
+        ):
+            for trial in self.trials:
+                trial.run()
         
         if self.sess == 3 and self.block == 2:
             # Add US block at the end of session 3
