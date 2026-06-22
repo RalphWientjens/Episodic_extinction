@@ -453,7 +453,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
             
             # Set durations for habituation block
             us_duration = 4.0
-            iti = self.jittered_iti(fixed_duration=us_duration, min_iti=5, max_iti=7, TR=self.TR)
+            iti = self.jittered_iti(fixed_duration=us_duration, min_iti=4, max_iti=8, TR=self.TR)
             
             if self.test_mode:
                 phase_durations = [us_duration * 0.01, iti * 0.01]
