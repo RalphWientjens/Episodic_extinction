@@ -118,6 +118,12 @@ session_1:
       The pictures will come in a few seconds.
       
       Get ready to focus!
+  
+  US_end:
+    - | 
+      This was the end of the first round.
+      
+      The experimenter will shortly come in to check on you, then you can continue with the next round.
 
   practice_start:
     - | 
@@ -168,7 +174,7 @@ session_2:
       Press SPACE to continue.
   Start instructions:
     - |
-      Today you should CONTINUE with YESTERDAY'S task.
+      Today you should CONTINUE with YESTERDAY'S imagination task.
 
       Please CONTINUE IMAGINING the vivid stories that you came up with YESTERDAY. Always imagine the story from the first person perspective.
       Some outcomes may not be shown. Please UPDATE your stories accordingly.
@@ -238,10 +244,16 @@ session_3:
 
   Start instructions:
     - | 
-      Today the CUES will once again be presented. SOME of these cues will be followed by the OUTCOME, others are not.
+      Today we will CONTINUE with yesterday's imagination task. the CUES will once again be presented. just like yesterday, SOME of these CUES will be followed by the OUTCOME, others are NOT.
 
-      When the cue is presented: please LOOK AT, COMPREHEND and ATTEND the cue on the screen.
+      Cues that were followed by their outcome yesterday, will AGAIN be followed by that outcome today. Cues whose outcome was missing yesterday, will AGAIN have no outcome today. Please REMEMBER what you learned yesterday.
 
+      press SPACE to continue.
+    - | 
+      When viewing each cue, we want you to MENTALLY RELIVE your MOST RECENT stody that is associated with it. 
+      While reliving each story, try to ENVISION the event as VIVIDLY and in as much detail as possible, as if you are witnessing it unfold once again.
+
+      Aim to RE-EXPERIENCE what you FELT, THOUGHT, and SENSED at the time of the event. 
 
       press SPACE to continue.
     - |

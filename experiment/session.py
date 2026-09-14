@@ -483,7 +483,18 @@ class ExtinctionSession(PylinkEyetrackerSession):
             us_trials = self.create_us_trials()
             for trial in us_trials:
                 trial.run()
+            
+            # Add a pause after the US habituation block for experimenter to check the participant and the equipment - make infinite wait until experimenter presses return to continue
+            self.show_text_screen(
+                text = self.instructions["session_1"]["US_end"][0],
+                wait_keys = ["return"]
+            )
 
+            if self.eyetracker_on:
+                self.stop_recording_eyetracker()
+                self.calibrate_eyetracker()
+                self.start_recording_eyetracker()
+                
         # practice trials for session 1 only
         if self.sess == 1:
             self.show_text_screen(
@@ -525,7 +536,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 # if self.eyetracker_on:
                 #     self.calibrate_eyetracker()
 
-                # other approach: stop and start the eyetracker, during calibration. Still to test!
+                # other approach: stop and start the eyetracker, during calibration. tested, works!
                 if self.eyetracker_on:
                     self.stop_recording_eyetracker()
                     self.calibrate_eyetracker()
