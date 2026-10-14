@@ -17,8 +17,9 @@ def main():
     sess =  sys.argv[2]
     version = sys.argv[3]
     # eyetracker_on = bool(sys.argv[4])
+    instructions = str(sys.argv[4]).upper()
     
-    output_str= "sub-" + subject+'_ses-'+sess+"_v-"+version
+    output_str= "sub-" + subject+'_ses-'+sess+"_v-"+version+"_inst-"+instructions
     
     output_dir = f'./logs/sub-{subject}/ses-{sess}/beh'
     
@@ -33,7 +34,8 @@ def main():
         output_dir=output_dir, 
         settings_file=settings_file,
         sess=int(sess),
-        version=version
+        version=version,
+        instructions=instructions
         )
     ts.run()
 

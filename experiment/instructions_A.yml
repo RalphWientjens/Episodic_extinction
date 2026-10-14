@@ -1,0 +1,302 @@
+before_start:
+  GET READY for the task!!
+
+session_1:
+  before_session:
+    - |
+      Welcome to the experiment.
+
+
+      Press SPACE to continue to the instructions.
+    - |
+      During the first phase of this experiment, you will see several images be presented on the screen, one after another.
+
+      The content of these images is either a NEUTRAL or an NEGATIVE scene. The images are accompanied by a MATCHING SOUND that will be played through the headphones. 
+      When these image-sound combinations are shown, you are supposed to look at and attend to these images and TAKE IN THE CONTENT of the images.
+
+      There is a fixation cross in the middle of the screen, please keep your focus on this cross for the whole duration of this block.  
+
+
+      Press SPACE to continue.
+    - |
+      During the second phase of this experiment, you will see several combinations of images and sounds.
+
+      Each time, TWO pictures will appear one after the other. The content of the FIRST picture is always a NEUTRAL object. 
+      The SECOND picture is either a NEUTRAL or an NEGATIVE scene. This second picture is accompanied by a matching sound that will be played through the headphones. This will be one of the image-sound combinations that you saw in the first block.
+
+      From now on, we will refer to the first neutral object picture as the CUE, and the second picture of a neutral or negative scene, including the sound, as the OUTCOME.  
+
+
+      Press SPACE to continue.
+    - |
+      Your task is to use the cue and the outcome to IMAGINE a VIVID STORY in which you play a central role. 
+      
+      You should imagine that you perceive the story through your own eyes. 
+      When you do this, it is important to FORM A CONNECTION between the two pictures so that when you are given the cue, you can recall the outcome. 
+      
+      It is essential that you spend the ENTIRE time vividly imagining your story with the cue-outcome pair, 
+      because you will be TESTED on these pairs immediately after this imagination phase.
+
+
+      Press SPACE to continue.
+    - |
+      Additionally, when the first picture is shown, a scale will appear. Using that scale, we ask you to indicate how DISTRESSED you feel AT THAT MOMENT.
+      The scale ranges from NOT AT ALL DISTRESSED to VERY DISTRESSED. 
+
+      Please rate this WITHIN THE CONTEXT of the current experiment, so:
+      When you feel the LEAST distressed, use the LEFT hand side of the scale.
+      When you feel the MOST distressed, use the RIGHT hand side of the scale.
+
+      Try to use the FULL range of the scale!
+
+
+      press SPACE to continue.
+    - | 
+      In total there are three imagination rounds, so you will get to see every event three times in total.
+
+      In between each imagination round, there will be a short break for you to relax. Please DON'T move too much, as you are attached to wires.
+
+
+      Press SPACE to continue.
+    - | 
+      In the final imagination round, after each picture pair, another scale will appear.
+      
+      On this scale, you should rate to what extent you feel like you have succeeded in creating a COHERENT story with the cue-outcome pairs. 
+      You should rate to what extent you were able to MENTALLY LINK all the pictures and the sound into ONE SINGLE story. 
+      
+      This scale ranges from:
+      NOT AT ALL coherent on the LEFT hand side of the scale to 
+      VERY coherent on the RIGTH hand side of the scale.
+
+
+      Press SPACE to continue.
+    - |  
+      To ANSWER the DISTRESS and COHERENCE SCALES, you should use the left and right ARROW KEYS using your RIGHT HAND.
+      
+      The scale will NOT start until you press a key for the first time. 
+      Once you press either arrow, THE SCALE ACTIVATES AT THE MIDDLEPOINT.
+
+      Once activated, CONTINUE pressing left or right to reach YOUR CORRECT VALUE. 
+      If you do not press anything, no rating will be recorded.
+
+
+      press SPACE to continue.
+    - |
+      For both scales, you have 4 seconds to submit your rating, you should submit your answer within these 4 seconds. 
+      This is NOT very long, so DON'T OVERTHINK your answer and go with your gut feeling.
+
+      There are NO RIGHT OR WRONG ANSWERS, just try to assess your answers as honestly as possible.
+
+
+      Press SPACE to continue.
+    - | 
+      During the task, please DO NOT look away, close your eyes or take off the headphones.
+
+      There will be a FIXATION CROSS in the MIDDLE of the screen for you to focus on during the imagination task.
+      Also during the distress scales, please KEEP LOOKING at the middle of the screen! 
+
+
+      Press SPACE to continue.
+    - |
+      You will start with a first round of image-sound combinations. Please PAY CLOSE ATTENTION to these images and  TAKE IN THEIR CONTENT.
+
+      We will start with calibrating the eye-tracker.
+
+
+      Press SPACE to continue, then follow the instructions of the experimenter.
+  
+  US_block:
+    - | 
+      You will now see various images with accompanying sounds. Some of the images and sounds can be aversive.
+      
+      Please PAY CLOSE ATTENTION to the images. Please KEEP LOOKING at the cross in the middle of the screen.
+
+      Press SPACE to continue.
+    
+  US_prepare:
+    - | 
+      The pictures will come in a few seconds.
+      
+      Get ready to focus!
+  
+  US_end:
+    - | 
+      This was the end of the first round.
+      
+      The experimenter will shortly come in to check on you, then you can continue with the next round.
+
+  practice_start:
+    - | 
+      There will now be two practice episodes with a cue and an outcome, and the scales.
+
+      Please remember: Try to IMAGINE a VIVID story where you play a CENTRAL role, and when looking at the cue, please rate HOW DISTRESSED you feel.
+      Use the left and right arrow to indicate how DISTRESSED you feel within the context of this experiment from NOT AT ALL DISTRESSED on the left to VERY DISTRESSED on the right.
+
+      In the last block (and during the practice trials), there will also be a COHERENCE scale. 
+
+      If you have any questions after the practice pairs, please let the experimenter know.
+
+      Press SPACE to start the practice episodes.
+    
+  practice_end:
+    - |
+      End of the practice episodes.
+
+      If you have any questions, ask the experimenter now.
+
+
+      If you are ready, press SPACE to start the experiment.
+
+
+  between_blocks:
+    - |
+      End of block {block}.
+
+      Take a short break.
+      Please stay still and keep your head on the chin rest.
+
+  end of break:
+    - |
+      The next block wil start in a few seconds!
+
+      please GET READY to imagine stories again!
+  
+
+
+session_2:
+  before_session:
+    - | 
+      Welcome back.
+
+      We will start with calibrating the eye-tracker again. Please follow the instructions.
+
+
+      Press SPACE to continue.
+  Start instructions:
+    - |
+      Today you will CONTINUE with yesterday's imagination task.
+
+      In contrast to yesterday, FOR SOME CUES, the corresponding OUTCOME will now be ABSENT.
+      For OTHER cues, the outcome WILL still happen.
+
+
+      Press SPACE to continue.
+    - |
+      For each cue, you should UPDATE your story of yesterday, using today's experience.
+
+      This is NOT a new, separate story - it should be the SAME story, CONTINUING.
+
+      Keep your stories VIVID and FIRST-PERSON, as if you are experiencing each event
+      through your own eyes.
+
+
+      Press SPACE to continue.
+    - |
+      There will again be a DISTRESS scale during the first picture. Using that scale, please indicate how distressed you feel AT THAT MOMENT.
+      The scale ranges from NOT AT ALL DISTRESSED to VERY DISTRESSED. 
+
+      Please rate this WITHIN THE CONTEXT of the current experiment, so:
+      When you feel the LEAST distressed, use the LEFT hand side of the scale.
+      When you feel the MOST distressed, use the RIGHT hand side of the scale.
+
+      Try to use the FULL range of the scale!
+
+
+      press SPACE to continue.
+    - |
+      Today there will be four rounds. In between each round, there will be a short break for you to relax. Please DON'T move too much, as you are attached to wires.
+      
+      In the LAST round, there will again be a COHERENCE scale for you to rate how coherent your story was.
+
+      Please give your ratings QUICKLY and ACCURATELY using the ARROW KEYS. 
+      You have 4 seconds per scale, this is NOT very long, so DON'T think too long and go with your gut feeling.
+
+
+      press SPACE to continue.
+    - | 
+      During the task, please DO NOT look away, close your eyes or take off the headphones.
+
+      There will be a FIXATION CROSS in the MIDDLE of the screen for you to focus on during the imagination task.
+      Also during the distress scale, please KEEP LOOKING at the middle of the screen!  
+
+
+      Press SPACE to continue.
+    - |
+      There will be NO practice cues today. The task will start straight away after this. 
+      If you have any questions, please ask the experimenter now.
+
+
+      If you are ready, press SPACE TO START the task.
+
+  between_blocks:
+    - |
+      End of block {block}.
+      
+      Please take a short break.
+      Please stay still and keep your head on the chin rest.
+
+  end of break:
+    - |
+      The next block wil start in a few seconds!
+
+      please GET READY to imagine stories again!
+
+session_3:
+  before_session:
+    - |
+      Welcome back.
+      This is the final session.
+
+      We will start with calibrating the eye-tracker again. Please follow the instructions.
+
+
+      Press SPACE to continue.
+
+  Start instructions:
+    - | 
+      Today we will CONTINUE with yesterday's imagination task. the CUES will once again be presented. just like yesterday, SOME of these CUES will be followed by the OUTCOME, others are NOT.
+
+      Cues that were followed by their outcome yesterday, will AGAIN be followed by that outcome today. Cues whose outcome was missing yesterday, will AGAIN have no outcome today. Please REMEMBER what you learned yesterday.
+
+      press SPACE to continue.
+    - | 
+      When viewing each cue, we want you to MENTALLY RELIVE your MOST RECENT stody that is associated with it. 
+      While reliving each story, try to ENVISION the event as VIVIDLY and in as much detail as possible, as if you are witnessing it unfold once again.
+
+      Aim to RE-EXPERIENCE what you FELT, THOUGHT, and SENSED at the time of the event. 
+
+      press SPACE to continue.
+    - |
+      There will again be a DISTRESS scale during the first picture. Using that scale, please indicate how distressed you feel AT THAT MOMENT.
+      The scale ranges from NOT AT ALL DISTRESSED to VERY DISTRESSED. 
+
+      Please rate this WITHIN THE CONTEXT of the current experiment, so:
+      When you feel the LEAST distressed, use the LEFT hand side of the scale.
+      When you feel the MOST distressed, use the RIGHT hand side of the scale.
+
+      Try to use the FULL range of the scale!
+
+
+      press SPACE to continue.
+    - |
+      Today there will only be ONE round. After this round you are FINISHED. There is NO coherence scale today.
+
+      Please give your distress ratings QUICKLY and ACCURATELY using the ARROW KEYS. 
+      You have 4 seconds per scale, this is NOT very long, so DON'T think too long and go with your gut feeling.
+
+
+      press SPACE to continue.
+    - | 
+      During the task, please DO NOT look away, close your eyes or take off the headphones.
+
+      There will be a FIXATION CROSS in the MIDDLE of the screen for you to focus on during the imagination task.
+      Also during the distress scale, please KEEP LOOKING at the middle of the screen!  
+
+
+      Press SPACE to continue.
+    - |
+      There will be NO practice cues today. The task will start straight away after this. 
+      If you have any questions, please ask the experimenter now.
+
+
+      If you are ready, press SPACE TO START the task.

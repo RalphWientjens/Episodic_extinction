@@ -139,6 +139,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
                  settings_file="expsettings.yml",
                  sess=None,
                  version=None,
+                 instructions=None,
                  OS="windows",
                  test_mode=False,
                  blocks=3,
@@ -186,6 +187,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         self.sess = sess  # Store session number
         self.version = version  # Store version number
+        self.instructions = instructions  # Store instructions version
         self.test_mode = self.settings["test_settings"]["test_mode_on"]  # Store test mode flag
 
         # blocks per session
@@ -207,10 +209,14 @@ class ExtinctionSession(PylinkEyetrackerSession):
         except KeyError:
             print(f"Error: Session {self.sess} is not defined. Please provide a valid session number (1, 2, or 3).")
             sys.exit(1)
-
-        instructions_path = os.path.join(
-            os.path.dirname(__file__),
-            "Instructions.yml",)
+        
+        if instructions not in ["A", "B"]:
+            print(f"Error: Instructions version {instructions} is not defined. Please provide a valid instructions version (A or B).")
+            sys.exit(1)
+        else: 
+            instructions_path = os.path.join(
+                os.path.dirname(__file__),
+                 "Instructions_" + instructions + ".yml",)
 
         with open(instructions_path, 'r') as file:
             self.instructions = yaml.safe_load(file)
