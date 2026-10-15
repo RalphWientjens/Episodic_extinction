@@ -19,7 +19,7 @@ def main():
     # eyetracker_on = bool(sys.argv[4])
     instructions = str(sys.argv[4]).upper()
     
-    output_str= "sub-" + subject+'_ses-'+sess+"_v-"+version+"_inst-"+instructions
+    output_str= "sub-" + subject+'_ses-'+sess+"_v-"+version+"_instr-"+instructions
     
     output_dir = f'./logs/sub-{subject}/ses-{sess}/beh'
     
