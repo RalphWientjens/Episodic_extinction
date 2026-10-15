@@ -9,17 +9,17 @@ session_1:
 
       Press SPACE to continue to the instructions.
     - |
-      During the first phase of this experiment, you will see several images be presented on the screen, one after another.
+      During the first phase of the experiment in the scanner, you will see several images be presented on the screen, one after another.
 
       The content of these images is either a NEUTRAL or an NEGATIVE scene. The images are accompanied by a MATCHING SOUND that will be played through the headphones. 
       When these image-sound combinations are shown, you are supposed to look at and attend to these images and TAKE IN THE CONTENT of the images.
 
-      There is a fixation cross in the middle of the screen, please keep your focus on this cross for the whole duration of this block.  
+      There is a fixation cross in the middle of the screen, please keep your focus on this cross for the whole duration of each block.  
 
 
       Press SPACE to continue.
     - |
-      During the second phase of this experiment, you will see several combinations of images and sounds.
+      During the second phase of the experiment, you will see several combinations of images and sounds.
 
       Each time, TWO pictures will appear one after the other. The content of the FIRST picture is always a NEUTRAL object. 
       The SECOND picture is either a NEUTRAL or an NEGATIVE scene. This second picture is accompanied by a matching sound that will be played through the headphones. This will be one of the image-sound combinations that you saw in the first block.
@@ -35,7 +35,7 @@ session_1:
       When you do this, it is important to FORM A CONNECTION between the two pictures so that when you are given the cue, you can recall the outcome. 
       
       It is essential that you spend the ENTIRE time vividly imagining your story with the cue-outcome pair, 
-      because you will be TESTED on these pairs immediately after this imagination phase.
+      because you will be TESTED on these pairs immediately after the imagination phase.
 
 
       Press SPACE to continue.
@@ -44,8 +44,8 @@ session_1:
       The scale ranges from NOT AT ALL DISTRESSED to VERY DISTRESSED. 
 
       Please rate this WITHIN THE CONTEXT of the current experiment, so:
-      When you feel the LEAST distressed, use the LEFT hand side of the scale.
-      When you feel the MOST distressed, use the RIGHT hand side of the scale.
+      When you feel the LEAST distressed during this task, use the LEFT hand side of the scale.
+      When you feel the MOST distressed during this task, use the RIGHT hand side of the scale.
 
       Try to use the FULL range of the scale!
 
@@ -54,7 +54,7 @@ session_1:
     - | 
       In total there are three imagination rounds, so you will get to see every event three times in total.
 
-      In between each imagination round, there will be a short break for you to relax. Please DON'T move too much, as you are attached to wires.
+      In between each imagination round, there will be a short break for you to relax. Please DON'T move too much during these breaks.
 
 
       Press SPACE to continue.
@@ -79,6 +79,8 @@ session_1:
       Once activated, CONTINUE pressing left or right to reach YOUR CORRECT VALUE. 
       If you do not press anything, no rating will be recorded.
 
+      In the scanner, you can answer the scales using the BUTTONS with your RIGHT HAND.
+
 
       press SPACE to continue.
     - |
@@ -90,7 +92,7 @@ session_1:
 
       Press SPACE to continue.
     - | 
-      During the task, please DO NOT look away, close your eyes or take off the headphones.
+      During the task, please DO NOT look away or close your eyes.
 
       There will be a FIXATION CROSS in the MIDDLE of the screen for you to focus on during the imagination task.
       Also during the distress scales, please KEEP LOOKING at the middle of the screen! 
@@ -98,7 +100,7 @@ session_1:
 
       Press SPACE to continue.
     - |
-      You will start with TWO practice trials outside the scanner, then you will go to the scanner space. 
+      You will start with TWO practice trials here, outside the scanner. After this, you will go to the scanner space. 
 
       PLEASE try the SCALES, and let the experimenter know if they are unclear.
 
@@ -123,7 +125,7 @@ session_1:
     - | 
       There will be TWO PRACTICE episodes with a cue and an outcome, and BOTH the scales.
 
-      IMAGINE a VIVID story and please rate HOW DISTRESSED you feel.
+      Try to IMAGINE a VIVID story, please rate HOW DISTRESSED you feel and HOW COHERENT your story is.
     
   practice_end:
     - |

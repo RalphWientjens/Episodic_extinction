@@ -294,6 +294,14 @@ class ExtinctionTrial(Trial):
         distress_pos  = (0, -self.session.settings["window"]["size"][1] // 2 - 20 - 50)
         coherence_pos = (0, 0)
 
+        # Determine the keys based on whether MRI is on or not
+        if self.session.mri_on:
+            key_left = 'b'  # Button box key for left
+            key_right = 'y'  # Button box key for right
+        else:
+            key_left = 'left'  # Arrow key for left
+            key_right = 'right'  # Arrow key for right
+
         self.distress_scale = KeyboardScale(
             win=self.session.win,
             pos=distress_pos,
@@ -302,7 +310,7 @@ class ExtinctionTrial(Trial):
             label_left='Not at all distressed',
             label_right='Very distressed',
             question='How distressed do you feel?',
-            left_key='b', right_key='y'       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
+            left_key=key_left, right_key=key_right       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
         )
 
         self.coherence_scale = KeyboardScale(
@@ -313,7 +321,7 @@ class ExtinctionTrial(Trial):
             label_left='Not at all coherent',
             label_right='Very coherent',
             question='How coherent was your story?',
-            left_key='b', right_key='y'
+            left_key=key_left, right_key=key_right
         )
         # self.phase = None  # Initialize phase to avoid AttributeError
         # self.last_phase = None
