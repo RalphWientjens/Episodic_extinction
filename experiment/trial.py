@@ -502,7 +502,7 @@ class ExtinctionTrial(Trial):
                 self.session.win.callOnFlip(self.session.serialPort.write, bytearray([self.parameters["episode_nr"]]))
 
             if useParallel:
-                self.session.win.callOnFlip(self.session.parallelPort.setData, self.parameters["episode_nr"])
+                self.session.win.callOnFlip(self.session.parallelPort.setData, int(self.parameters["episode_nr"]))
                 self.parallelPortStartFrame = 0 # log_phase_info sets session nr_frames to 0.
 
             # load next trial if needed

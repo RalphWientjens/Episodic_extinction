@@ -295,23 +295,64 @@ class ExtinctionSession(PylinkEyetrackerSession):
         """Determine if this is the last block of the session, based on session and block number."""
         return self.block == self.session_to_blocks.get(self.sess)
     
-    def jittered_iti(self, fixed_duration, min_iti=2, max_iti=8, TR=1.6):
-        """Return an ITI that brings total trial duration to a TR multiple."""
+    def build_iti_schedule(self, fixed_duration, min_iti, max_iti, n_trials, TR=1.6):
+        """Pre-generate a shuffled list of n_trials ITIs with a known total duration.
+
+        Every ITI is a TR multiple, but instead of drawing
+        each one independently at random, every valid TR-multiple option is used
+        as close to equally often as possible across the round. This fixes the
+        round's total scan duration in advance (it no longer depends on which
+        options happen to get drawn), while still varying the ITI trial-to-trial.
+        """
         total_min = fixed_duration + min_iti
         total_max = fixed_duration + max_iti
-        
-        # All TR multiples in the valid range
+
         n_min = int(np.ceil(total_min / TR))
         n_max = int(np.floor(total_max / TR))
-        
+
         if n_min > n_max:
             raise ValueError(f"No TR multiple in ITI range [{min_iti}, {max_iti}] for fixed duration {fixed_duration}")
-        
-        chosen_n = random.randint(n_min, n_max)
-        return chosen_n * TR - fixed_duration
 
+        options = list(range(n_min, n_max + 1))
+        itis = [n * TR - fixed_duration for n in options]
 
-    def get_phases_for_trial(self, condition_label: str, is_last_block: bool):
+        n_options = len(options)
+        base_count, remainder = divmod(n_trials, n_options)
+        counts = [base_count] * n_options
+        # Spread any remainder over a random subset of options, so no single
+        # ITI value is systematically over-represented.
+        for i in random.sample(range(n_options), remainder):
+            counts[i] += 1
+
+        schedule = []
+        for iti, count in zip(itis, counts):
+            schedule.extend([iti] * count)
+
+        random.shuffle(schedule)
+        return schedule
+
+    def round_iti_bounds_and_fixed_total(self, is_last_block):
+        """Determine the fixed (non-ITI) phase duration and ITI bounds for a round.
+
+        These only depend on the session and whether this is the last block
+        (not on the trial's condition label), so they can be computed once per
+        round and reused to build the ITI schedule.
+        """
+        cfg = SESSION_CONFIG[self.sess]
+        coherence_last_block = is_last_block and cfg.get("coherence_last_block", False)
+        iti_phase_key = "fixcross" if coherence_last_block else "fixcross_long"
+        _, (lo, hi) = PHASES[iti_phase_key]
+
+        fixed_total = PHASES["CS"][1] + PHASES["CS_distress"][1] + PHASES["US"][1]
+        if coherence_last_block:
+            fixed_total += PHASES["coherence"][1]
+
+        if self.test_mode:
+            fixed_total *= 0.05
+
+        return fixed_total, lo, hi
+
+    def get_phases_for_trial(self, condition_label: str, is_last_block: bool, iti: float):
         """Get phase names and durations for a trial, based off the session and condition.
     
         Parameters
@@ -333,34 +374,24 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         phase_names = []
         phase_durations = []
-        fixed_total = 0.0
 
         ITI_PHASES = {"fixcross", "fixcross_long"}
+
+        trial_iti = iti * 0.05 if self.test_mode else iti
 
         for phase_key in base_phases:
             draw_name, duration = PHASES[phase_key]
 
             if phase_key in ITI_PHASES:
-                # For ITI phases, we want to jitter the duration to be a multiple of TR
-                # defer - compute after fixed_total is known
+                # ITI phases get the pre-generated, TR-multiple-based ITI
+                # (see build_iti_schedule / round_iti_bounds_and_fixed_total)
                 phase_names.append(draw_name)
-                phase_durations.append(None)  # placeholder, will compute after loop
-            else: 
+                phase_durations.append(trial_iti)
+            else:
                 if self.test_mode:
                     duration *= 0.05  # speed up for testing
                 phase_names.append(draw_name)
                 phase_durations.append(duration)
-                fixed_total += duration
-            
-        # Now resolve ITI placeholders
-        _, (lo, hi) = PHASES["fixcross_long"]  if not is_last_block else PHASES["fixcross"]
-
-        iti = self.jittered_iti(fixed_duration=fixed_total, min_iti=lo, max_iti=hi, TR=self.TR)
-
-        if self.test_mode:
-            iti *= 0.05  # speed up for testing
-        
-        phase_durations = [iti if d is None else d for d in phase_durations]
 
         return dict(names=phase_names, durations=phase_durations)
     
@@ -396,6 +427,15 @@ class ExtinctionSession(PylinkEyetrackerSession):
         practice_trials = []
 
         # practice uses last-block phase structure
+        fixed_total, lo, hi = self.round_iti_bounds_and_fixed_total(is_last_block=True)
+        iti_schedule = self.build_iti_schedule(
+            fixed_duration=fixed_total,
+            min_iti=lo,
+            max_iti=hi,
+            n_trials=len(self.practice_stimset),
+            TR=self.TR,
+        )
+
         for trial_nr, stim_row in self.practice_stimset.iterrows():
 
             params = stim_row.to_dict()
@@ -408,6 +448,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
             phases = self.get_phases_for_trial(
                 condition_label=condition_label,
                 is_last_block=True,
+                iti=iti_schedule[trial_nr],
             )
 
             if trial_nr == 0:
@@ -446,15 +487,23 @@ class ExtinctionSession(PylinkEyetrackerSession):
         us_episode_nrs = randomized_stims.groupby('US')['episode_nr'].first()
         
         phase_names = ['US', 'fixcross']
-        
+
+        # Set durations for habituation block
+        us_duration = 4.0
+        iti_schedule = self.build_iti_schedule(
+            fixed_duration=us_duration,
+            min_iti=4,
+            max_iti=8,
+            n_trials=len(unique_us),
+            TR=self.TR,
+        )
+
         for trial_nr, us_stim in enumerate(unique_us):
             us_sound = us_sounds[us_stim]
             episode_nr = us_episode_nrs[us_stim]
-            
-            # Set durations for habituation block
-            us_duration = 4.0
-            iti = self.jittered_iti(fixed_duration=us_duration, min_iti=4, max_iti=8, TR=self.TR)
-            
+
+            iti = iti_schedule[trial_nr]
+
             if self.test_mode:
                 phase_durations = [us_duration * 0.01, iti * 0.01]
             else:
@@ -504,6 +553,18 @@ class ExtinctionSession(PylinkEyetrackerSession):
             seed=None
         )
 
+        # Fixed (non-ITI) duration and ITI bounds are the same for every trial
+        # in this round, so the ITI schedule can be built once up front —
+        # fixing the round's total scan duration in advance.
+        fixed_total, lo, hi = self.round_iti_bounds_and_fixed_total(is_last_block)
+        iti_schedule = self.build_iti_schedule(
+            fixed_duration=fixed_total,
+            min_iti=lo,
+            max_iti=hi,
+            n_trials=len(randomized_stimset),
+            TR=self.TR,
+        )
+
         for trial_nr, stim_row in randomized_stimset.iterrows():
             params = stim_row.to_dict()
             params["block"] = self.block
@@ -513,7 +574,8 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
             phases = self.get_phases_for_trial(
                 condition_label=condition_label,
-                is_last_block=is_last_block
+                is_last_block=is_last_block,
+                iti=iti_schedule[trial_nr],
             )
 
             trial = ExtinctionTrial(
