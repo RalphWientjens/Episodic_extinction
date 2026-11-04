@@ -427,7 +427,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
         return ExtinctionTrial(
             session=self,
             phase_names=["frown", "fixcross"],
-            phase_durations=[2 * TR, 4 * TR],
+            phase_durations=[3 * TR, 4 * TR],
             trial_nr=0,
             parameters={"block": self.block,
                         "practice": False,
