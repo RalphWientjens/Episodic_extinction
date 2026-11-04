@@ -13,6 +13,31 @@ from psychopy.core import getTime, Clock
 import numpy as np
 import os
 
+# Reference resolution (behavioral lab screen) at which all pixel sizes were tuned.
+# All stimulus sizes are multiplied by get_scale(win) so the layout is identical in proportion on any screen.
+REF_W, REF_H = 2560, 1440
+
+# Stimulus layout at the reference resolution (multiplied by get_scale(win) at runtime)
+IMG_SIZE = 1000          # CS / US image width and height in px (was 800; 1.25x)
+SCALE_WIDTH = 1350       # px width of the rating bar (was 900; 1.5x). The white box is 200 px wider than the bar
+SCALE_HEIGHT = 180       # px height of the white rating box (was 160; 1.125x)
+SCALE_TEXT_Q = 30        # px text height of the rating question (was 24; 1.25x)
+SCALE_TEXT_LABEL = 24    # px text height of the anchor labels and numeric readout (was 20; reduced from 25 so the labels fit inside the box)
+DISTRESS_OFFSET = 110    # px between the bottom screen edge and the CENTRE of the distress scale box (box is SCALE_HEIGHT = 180 px high,
+                         # so box top = 20 px below the image bottom edge at -IMG_SIZE/2 = -500 and box bottom = 20 px above the screen edge)
+
+def get_win_size(win):
+    """Window size in the coordinate space that 'pix' units are drawn in.
+    On Retina Macs win.size is the framebuffer (2x the screen in points) while clientSize is in points
+    (matching the screen size PsychoPy warns about), so prefer clientSize when it exists."""
+    size = getattr(win, "clientSize", None)
+    return size if size is not None else win.size
+
+def get_scale(win):
+    """Scale factor relative to the reference screen (min over both axes so nothing clips)."""
+    w, h = get_win_size(win)
+    return min(w / REF_W, h / REF_H)
+
 class KeyboardScale:
     """
     A horizontally sliding scale driven entirely by keypresses.
@@ -36,15 +61,18 @@ class KeyboardScale:
     question   : question text drawn above the scale
     left_key   : key name for leftward movement  (default 'left')
     right_key  : key name for rightward movement (default 'right')
+    s          : scale factor applied to all pixel quantities (see get_scale)
     """
 
-    def __init__(self, win, pos, width=900,
+    def __init__(self, win, pos, width=SCALE_WIDTH,
                  min_val=0, max_val=10, start_val=5, step=1,
                  label_left='', label_right='', question='',
-                 left_key='left', right_key='right'):
+                 left_key='left', right_key='right', s=1.0):
 
         self.win = win
         self.pos = pos
+        self.s = s
+        width = width * s      # scale bar width before it is stored / used in _val_to_pos
         self.width = width
         self.min_val = min_val
         self.max_val = max_val
@@ -63,15 +91,15 @@ class KeyboardScale:
 
         # Background box
         self.box = visual.Rect(
-            win, width=width + 200, height=160,
+            win, width=width + 215 * s, height=SCALE_HEIGHT * s,
             lineColor='black', fillColor='white',
             pos=(cx, cy)
         )
 
         # Question text (above the bar)
         self.question_stim = visual.TextStim(
-            win, text=question, height=24, color='black', font='Arial',
-            pos=(cx, cy + 55), anchorHoriz='center'
+            win, text=question, height=SCALE_TEXT_Q * s, color='black', font='Arial',
+            pos=(cx, cy + 55 * s), anchorHoriz='center'
         )
 
         # Horizontal bar
@@ -79,51 +107,45 @@ class KeyboardScale:
             win,
             start=(cx - width / 2, cy),
             end=(cx + width / 2, cy),
-            lineColor='black', lineWidth=3
+            lineColor='black', lineWidth=max(1, 3 * s)
         )
 
         # Tick marks at each end
-        tick_h = 25
+        tick_h = 25 * s
         self.tick_left = visual.Line(
             win,
             start=(cx - width / 2, cy - tick_h),
             end=(cx - width / 2, cy + tick_h),
-            lineColor='black', lineWidth=5
+            lineColor='black', lineWidth=max(1, 5 * s)
         )
         self.tick_right = visual.Line(
             win,
             start=(cx + width / 2, cy - tick_h),
             end=(cx + width / 2, cy + tick_h),
-            lineColor='black', lineWidth=5
+            lineColor='black', lineWidth=max(1, 5 * s)
         )
 
         # Marker (moveable circle)
         self.marker = visual.Circle(
-            win, radius=25,
+            win, radius=25 * s,
             fillColor = "grey", lineColor= "darkgrey",
             pos=self._val_to_pos(start_val)
         )
 
         # Anchor labels
         self.label_left_stim = visual.TextStim(
-            win, text=label_left, height=20, color='black', font='Arial',
-            pos=(cx - width / 2, cy - 35), anchorHoriz='center'
+            win, text=label_left, height=SCALE_TEXT_LABEL * s, color='black', font='Arial',
+            pos=(cx - width / 2, cy - 40 * s), anchorHoriz='center'
         )
         self.label_right_stim = visual.TextStim(
-            win, text=label_right, height=20, color='black', font='Arial',
-            pos=(cx + width / 2, cy - 35), anchorHoriz='center'
-        )
-
-        # Question text (above the bar)
-        self.question_stim = visual.TextStim(
-            win, text=question, height=24, color='black', font='Arial',
-            pos=(cx, cy + 55), anchorHoriz='center'
+            win, text=label_right, height=SCALE_TEXT_LABEL * s, color='black', font='Arial',
+            pos=(cx + width / 2, cy - 40 * s), anchorHoriz='center'
         )
 
         # Numeric readout (below marker)
         self.readout_stim = visual.TextStim(
-            win, text=str(int(start_val)), height=20, color='black', font='Arial',
-            pos=(cx, cy - 60), anchorHoriz='center'
+            win, text=str(int(start_val)), height=SCALE_TEXT_LABEL * s, color='black', font='Arial',
+            pos=(cx, cy - 68 * s), anchorHoriz='center'
         )
         self.readout_stim.opacity = 0  # start invisible until first keypress
 
@@ -251,6 +273,10 @@ class ExtinctionTrial(Trial):
         # ============================ STIMULI =======================================
         # Stimulus directory
         stim_dir = os.path.join(os.path.dirname(__file__), "stimulus_files")
+
+        # Scale factor (relative to the 2560x1440 reference) and real window height
+        s = get_scale(self.session.win)
+        h = get_win_size(self.session.win)[1]
         self.CS = self.parameters["CS"]
         self.US = self.parameters["US"]
         self.US_sound_file = self.parameters["US_sound"]
@@ -260,7 +286,7 @@ class ExtinctionTrial(Trial):
                 self.session.win,
                 # image=os.path.join(stim_dir, "CS_equalized", self.CS),  #for equalized luminance images
                 image=os.path.join(stim_dir, "CS", self.CS),
-                size=(800, 800),
+                size=(IMG_SIZE * s, IMG_SIZE * s),
                 texRes=512,
                 interpolate=True
             )
@@ -272,7 +298,7 @@ class ExtinctionTrial(Trial):
                 self.session.win,
                 # image=os.path.join(stim_dir, "US_equalized", self.US), #for equalized luminance images
                 image=os.path.join(stim_dir, "US", self.US),
-                size=(800, 800),
+                size=(IMG_SIZE * s, IMG_SIZE * s),
                 texRes=512,
                 interpolate=True
             )
@@ -280,7 +306,14 @@ class ExtinctionTrial(Trial):
             self.US_img = None  # No US for this trial
 
         # Fixation cross
-        self.fixation = visual.TextStim(self.session.win, text='+', height=50, color='black', font="Arial")
+        self.fixation = visual.TextStim(self.session.win, text='+', height=75 * s, color='black', font="Arial")
+
+        # Frowning instruction text
+        self.frown_text = visual.TextStim(
+            self.session.win,
+            text=self.session.instructions.get("frowning", "Please frown NOW"),
+            height=50 * s, color='black', font="Arial"
+        )
 
         # Sound
         if parameters.get('US_sound', ''):
@@ -291,7 +324,7 @@ class ExtinctionTrial(Trial):
         # ============================ Use keyboard scales instead =======================================
         # Position: near the bottom of the screen for distress (shown over CS),
         # centred for coherence (shown alone during ITI).
-        distress_pos  = (0, -self.session.settings["window"]["size"][1] // 2 - 20 - 50)
+        distress_pos  = (0, -h // 2 + DISTRESS_OFFSET * s)   # see DISTRESS_OFFSET at top of file
         coherence_pos = (0, 0)
 
         # Determine the keys based on whether MRI is on or not
@@ -305,23 +338,23 @@ class ExtinctionTrial(Trial):
         self.distress_scale = KeyboardScale(
             win=self.session.win,
             pos=distress_pos,
-            width=900,
+            width=SCALE_WIDTH,
             min_val=0, max_val=10, start_val=5, step=1,
             label_left='Not at all distressed',
             label_right='Very distressed',
             question='How distressed do you feel?',
-            left_key=key_left, right_key=key_right       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
+            left_key=key_left, right_key=key_right, s=s       # ← change to '1'/'2' or 'b'/'y' for button box in fMRI
         )
 
         self.coherence_scale = KeyboardScale(
             win=self.session.win,
             pos=coherence_pos,
-            width=900,
+            width=SCALE_WIDTH,
             min_val=0, max_val=10, start_val=5, step=1,
             label_left='Not at all coherent',
             label_right='Very coherent',
             question='How coherent was your story?',
-            left_key=key_left, right_key=key_right
+            left_key=key_left, right_key=key_right, s=s
         )
         # self.phase = None  # Initialize phase to avoid AttributeError
         # self.last_phase = None
@@ -409,6 +442,9 @@ class ExtinctionTrial(Trial):
 
         elif self.phase_name == "coherence":  # Coherence
             self.coherence_scale.draw()
+
+        elif self.phase_name == "frown":  # frown instruction
+            self.frown_text.draw()
 
         elif self.phase_name == "fixcross":  # fixcross
             self.fixation.draw()

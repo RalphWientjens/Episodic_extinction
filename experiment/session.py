@@ -8,7 +8,7 @@ Session class for Episodic Extinction experiment.
 
 from exptools2.core import PylinkEyetrackerSession #Set on if eyetracker is used, otherwise use Session
 from exptools2.core import Session
-from trial import ExtinctionTrial
+from trial import ExtinctionTrial, get_scale, get_win_size
 import numpy as np
 import pandas as pd
 from psychopy import core, visual, event, logging
@@ -261,16 +261,16 @@ class ExtinctionSession(PylinkEyetrackerSession):
         self.n_trials = len(self.stimset)
 
 
-    def show_text_screen(self, text, height=28, color="black", wait_keys=None, duration=None):
+    def show_text_screen(self, text, height=50, color="black", wait_keys=None, duration=None):
         """Show a full-screen text and wait for key press."""
 
         msg = visual.TextStim(
             win=self.win,
             text=text,
-            height=height,
+            height=height * get_scale(self.win),
             color=color,
             font="Arial",
-            wrapWidth=0.9 * self.win.size[0],
+            wrapWidth=0.9 * get_win_size(self.win)[0],
         )
 
         msg.draw()
@@ -421,6 +421,25 @@ class ExtinctionSession(PylinkEyetrackerSession):
             dummy_trials.append(trial)
 
         return dummy_trials
+
+    def create_frown_trial(self, TR=1.6):
+        """Frowning phase after the dummy TRs: 'Please frown NOW' for 2 TRs, then fixcross for 5 TRs."""
+        return ExtinctionTrial(
+            session=self,
+            phase_names=["frown", "fixcross"],
+            phase_durations=[2 * TR, 4 * TR],
+            trial_nr=0,
+            parameters={"block": self.block,
+                        "practice": False,
+                        "dummy": False,
+                        "CS": "",
+                        "US": "",
+                        "US_sound": "",
+                        "condition": 0,
+                        "valence": 0,
+                        "episode_nr": 50,  # marker value sent (serial + parallel) at the onset of both frown phases,
+                        },
+        )
 
     def create_practice_trials(self):
         """Create practice trials for session 1 only."""
@@ -594,9 +613,17 @@ class ExtinctionSession(PylinkEyetrackerSession):
         
         In MRI sessions, there are no instructions. All instructions are given outside scanner"""
 
+        print(f"Window size: {tuple(self.win.size)}, client size: {tuple(get_win_size(self.win))}, stimulus scale: {get_scale(self.win):.3f}")
+
         # Create main trials
         self.create_trials()
         dummy_trials = self.create_dummy_trials(n_dummy=2, TR=self.TR)
+
+        # Build US habituation trials up front (loading images/sounds is slow and would
+        # otherwise delay the timeline), for session 1 block 0 and session 3 block 2
+        us_trials = []
+        if (self.sess == 1 and self.block == 0) or (self.sess == 3 and self.block == 2):
+            us_trials = self.create_us_trials()
 
         # Tracker calibration
         if self.eyetracker_on:
@@ -616,8 +643,8 @@ class ExtinctionSession(PylinkEyetrackerSession):
         if self.sess == 1 and self.block == 0:
             self.start_experiment()        
             dummy_trials[0].run()   # present first dummy trial for MRI synchronization, to be removed in data processing
+            self.create_frown_trial(TR=self.TR).run()  # frowning phase (first block of session 1)
             
-            us_trials = self.create_us_trials()
             for trial in us_trials:
                 trial.run()
         
@@ -647,6 +674,8 @@ class ExtinctionSession(PylinkEyetrackerSession):
             #start experiment timing for blocks 2 and 3 of session 1 and sessions 2 and 3
             self.start_experiment()
             dummy_trials[0].run()  # present first dummy trial for MRI synchronization, to be removed in data processing
+            if self.sess in (2, 3) and self.block == 1:
+                self.create_frown_trial(TR=self.TR).run()  # frowning phase (first block of sessions 2 and 3)
 
         # for all trials except block 0 and block 9 of session 1 and block 2 of session 3 (US block at the end), run the main trials as usual:
         if not (
@@ -658,8 +687,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 trial.run()
         
         if self.sess == 3 and self.block == 2:
-            # Add US block at the end of session 3
-            us_trials = self.create_us_trials()
+            # Add US block at the end of session 3 (trials were pre-created above)
             for trial in us_trials:
                 trial.run()
         

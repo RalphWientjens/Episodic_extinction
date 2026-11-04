@@ -1,6 +1,9 @@
 before_start:
   GET READY for the task!!
 
+frowning:
+  Please frown NOW
+
 session_1:
   before_session:
     - |
