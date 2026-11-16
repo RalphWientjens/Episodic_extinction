@@ -22,16 +22,22 @@ from pathlib import Path
 import hedfpy
 
 PHASES = {
-    "CS":               ("CS", 3.0),
+    "CS":               ("CS", 4.0),
     "CS_distress":      ("CS_distress", 4.0),
     "US":               ("US", 4.0),
     "EXT":              ("fixcross", 4.0),
     "coherence":        ("coherence", 4.0),
     "reinforced_EXT":   ("fixcross", 4.0),  # duration defined per phase
-    "fixcross":         ("fixcross", (4,8)),
-    "fixcross_long":    ("fixcross", (8, 12)),
+    # ITI phases: tuple of possible ITI durations (s). Not TR-locked (slice-time
+    # correction / 'theoretical TRs' are handled in preprocessing). Each option is
+    # used equally often within a round (see build_iti_schedule).
+    "fixcross":         ("fixcross", (4, 6, 8)),      # last round with coherence scale
+    "fixcross_long":    ("fixcross", (8, 10, 12)),    # all other rounds
     "dummy_fixcross":   ("fixcross", 16),  # for dummy TRs at the start of the session, to be removed in data processing
 }
+
+US_HABITUATION_ITIS = (8, 10, 12)  # ITIs for the US habituation block (day 1 round 0, day 3 round 2)
+FROWN_DURATIONS = (4.0, 8.0)       # 'Please frown NOW' (s), followed by fixcross (s)
 
 SESSION_CONFIG = {
     1: dict(
@@ -198,7 +204,7 @@ class ExtinctionSession(PylinkEyetrackerSession):
         self.session_to_blocks = {
             1: 3,
             2: 4,
-            3: 2,
+            3: 1,
         }
 
         if self.sess not in self.session_to_blocks:
@@ -295,27 +301,15 @@ class ExtinctionSession(PylinkEyetrackerSession):
         """Determine if this is the last block of the session, based on session and block number."""
         return self.block == self.session_to_blocks.get(self.sess)
     
-    def build_iti_schedule(self, fixed_duration, min_iti, max_iti, n_trials, TR=1.6):
+    def build_iti_schedule(self, iti_options, n_trials):
         """Pre-generate a shuffled list of n_trials ITIs with a known total duration.
 
-        Every ITI is a TR multiple, but instead of drawing
-        each one independently at random, every valid TR-multiple option is used
-        as close to equally often as possible across the round. This fixes the
-        round's total scan duration in advance (it no longer depends on which
-        options happen to get drawn), while still varying the ITI trial-to-trial.
+        Every option in iti_options is used as close to equally often as possible
+        across the round (e.g. 36 trials with (8, 10, 12) -> 12 x each), so the
+        round's total duration is fixed in advance while the ITI still varies
+        trial-to-trial. ITIs are NOT locked to the TR.
         """
-        total_min = fixed_duration + min_iti
-        total_max = fixed_duration + max_iti
-
-        n_min = int(np.ceil(total_min / TR))
-        n_max = int(np.floor(total_max / TR))
-
-        if n_min > n_max:
-            raise ValueError(f"No TR multiple in ITI range [{min_iti}, {max_iti}] for fixed duration {fixed_duration}")
-
-        options = list(range(n_min, n_max + 1))
-        itis = [n * TR - fixed_duration for n in options]
-
+        options = list(iti_options)
         n_options = len(options)
         base_count, remainder = divmod(n_trials, n_options)
         counts = [base_count] * n_options
@@ -325,32 +319,19 @@ class ExtinctionSession(PylinkEyetrackerSession):
             counts[i] += 1
 
         schedule = []
-        for iti, count in zip(itis, counts):
-            schedule.extend([iti] * count)
+        for iti, count in zip(options, counts):
+            schedule.extend([float(iti)] * count)
 
         random.shuffle(schedule)
         return schedule
 
-    def round_iti_bounds_and_fixed_total(self, is_last_block):
-        """Determine the fixed (non-ITI) phase duration and ITI bounds for a round.
-
-        These only depend on the session and whether this is the last block
-        (not on the trial's condition label), so they can be computed once per
-        round and reused to build the ITI schedule.
-        """
+    def round_iti_options(self, is_last_block):
+        """ITI options for a round: depends only on the session and whether this
+        is the last block (coherence round), not on the trial's condition label."""
         cfg = SESSION_CONFIG[self.sess]
         coherence_last_block = is_last_block and cfg.get("coherence_last_block", False)
         iti_phase_key = "fixcross" if coherence_last_block else "fixcross_long"
-        _, (lo, hi) = PHASES[iti_phase_key]
-
-        fixed_total = PHASES["CS"][1] + PHASES["CS_distress"][1] + PHASES["US"][1]
-        if coherence_last_block:
-            fixed_total += PHASES["coherence"][1]
-
-        if self.test_mode:
-            fixed_total *= 0.05
-
-        return fixed_total, lo, hi
+        return PHASES[iti_phase_key][1]
 
     def get_phases_for_trial(self, condition_label: str, is_last_block: bool, iti: float):
         """Get phase names and durations for a trial, based off the session and condition.
@@ -383,8 +364,8 @@ class ExtinctionSession(PylinkEyetrackerSession):
             draw_name, duration = PHASES[phase_key]
 
             if phase_key in ITI_PHASES:
-                # ITI phases get the pre-generated, TR-multiple-based ITI
-                # (see build_iti_schedule / round_iti_bounds_and_fixed_total)
+                # ITI phases get the pre-generated, counterbalanced ITI
+                # (see build_iti_schedule / round_iti_options)
                 phase_names.append(draw_name)
                 phase_durations.append(trial_iti)
             else:
@@ -422,12 +403,12 @@ class ExtinctionSession(PylinkEyetrackerSession):
 
         return dummy_trials
 
-    def create_frown_trial(self, TR=1.6):
-        """Frowning phase after the dummy TRs: 'Please frown NOW' for 2 TRs, then fixcross for 5 TRs."""
+    def create_frown_trial(self):
+        """Frowning phase after the dummy TRs: 'Please frown NOW' for 4 s, then fixcross for 8 s (not TR-locked)."""
         return ExtinctionTrial(
             session=self,
-            phase_names=["frown", "fixcross"],
-            phase_durations=[3 * TR, 4 * TR],
+            phase_names=["frown", "fixcross"],  # 4 s frown + 8 s fixcross
+            phase_durations=[d * 0.05 for d in FROWN_DURATIONS] if self.test_mode else list(FROWN_DURATIONS),
             trial_nr=0,
             parameters={"block": self.block,
                         "practice": False,
@@ -446,13 +427,9 @@ class ExtinctionSession(PylinkEyetrackerSession):
         practice_trials = []
 
         # practice uses last-block phase structure
-        fixed_total, lo, hi = self.round_iti_bounds_and_fixed_total(is_last_block=True)
         iti_schedule = self.build_iti_schedule(
-            fixed_duration=fixed_total,
-            min_iti=lo,
-            max_iti=hi,
+            iti_options=self.round_iti_options(is_last_block=True),
             n_trials=len(self.practice_stimset),
-            TR=self.TR,
         )
 
         for trial_nr, stim_row in self.practice_stimset.iterrows():
@@ -510,11 +487,8 @@ class ExtinctionSession(PylinkEyetrackerSession):
         # Set durations for habituation block
         us_duration = 4.0
         iti_schedule = self.build_iti_schedule(
-            fixed_duration=us_duration,
-            min_iti=4,
-            max_iti=8,
+            iti_options=US_HABITUATION_ITIS,
             n_trials=len(unique_us),
-            TR=self.TR,
         )
 
         for trial_nr, us_stim in enumerate(unique_us):
@@ -572,16 +546,12 @@ class ExtinctionSession(PylinkEyetrackerSession):
             seed=None
         )
 
-        # Fixed (non-ITI) duration and ITI bounds are the same for every trial
-        # in this round, so the ITI schedule can be built once up front —
-        # fixing the round's total scan duration in advance.
-        fixed_total, lo, hi = self.round_iti_bounds_and_fixed_total(is_last_block)
+        # ITI options are the same for every trial in this round, so the ITI
+        # schedule can be built once up front — fixing the round's total scan
+        # duration in advance.
         iti_schedule = self.build_iti_schedule(
-            fixed_duration=fixed_total,
-            min_iti=lo,
-            max_iti=hi,
+            iti_options=self.round_iti_options(is_last_block),
             n_trials=len(randomized_stimset),
-            TR=self.TR,
         )
 
         for trial_nr, stim_row in randomized_stimset.iterrows():
@@ -620,9 +590,9 @@ class ExtinctionSession(PylinkEyetrackerSession):
         dummy_trials = self.create_dummy_trials(n_dummy=2, TR=self.TR)
 
         # Build US habituation trials up front (loading images/sounds is slow and would
-        # otherwise delay the timeline), for session 1 block 0 and session 3 block 2
+        # otherwise delay the timeline), for session 1 block 0 only
         us_trials = []
-        if (self.sess == 1 and self.block == 0) or (self.sess == 3 and self.block == 2):
+        if self.sess == 1 and self.block == 0:
             us_trials = self.create_us_trials()
 
         # Tracker calibration
@@ -639,58 +609,43 @@ class ExtinctionSession(PylinkEyetrackerSession):
                 wait_keys=[self.settings['mri'].get('sync', 't')]
             )
 
-        # US habituation block for session 1 only (BEFORE practice) == block 0
-        if self.sess == 1 and self.block == 0:
-            self.start_experiment()        
-            dummy_trials[0].run()   # present first dummy trial for MRI synchronization, to be removed in data processing
-            self.create_frown_trial(TR=self.TR).run()  # frowning phase (first block of session 1)
-            
-            for trial in us_trials:
-                trial.run()
-        
-        # create separate block for practicing trials outside scanner (block 9)
         if self.sess == 1 and self.block == 9:
-            self.start_experiment()        
+            # practice block outside the scanner (session 1 only)
+            self.start_experiment()
 
             self.show_instruction_sequence(
                 self.instructions["session_1"]["before_session"])
-            
-            # practice trials for session 1 only
+
             self.show_text_screen(
                 self.instructions["session_1"]["practice_start"][0],
-                duration=6.4        # 4 TRs
+                duration=6.4
             )
 
             for trial in self.practice_trials:
                 trial.run()
 
-            # indicate start of true experiment after practice, for session 1 only
+            # indicate start of true experiment after practice
             self.show_text_screen(
                 self.instructions["session_1"]["practice_end"][0],
-                duration=6.4  # 4 TRs
+                duration=6.4
             )
 
-        else:            
-            #start experiment timing for blocks 2 and 3 of session 1 and sessions 2 and 3
+        else:
+            # scanner rounds: start dummy, frowning phase in the first round of each day, then trials
             self.start_experiment()
-            dummy_trials[0].run()  # present first dummy trial for MRI synchronization, to be removed in data processing
-            if self.sess in (2, 3) and self.block == 1:
-                self.create_frown_trial(TR=self.TR).run()  # frowning phase (first block of sessions 2 and 3)
+            dummy_trials[0].run()  # first dummy trial for MRI synchronization, to be removed in data processing
 
-        # for all trials except block 0 and block 9 of session 1 and block 2 of session 3 (US block at the end), run the main trials as usual:
-        if not (
-            (self.sess == 1 and self.block == 0) or 
-            (self.sess == 1 and self.block == 9) or 
-            (self.sess == 3 and self.block == 2)
-        ):
-            for trial in self.trials:
-                trial.run()
-        
-        if self.sess == 3 and self.block == 2:
-            # Add US block at the end of session 3 (trials were pre-created above)
-            for trial in us_trials:
-                trial.run()
-        
+            if (self.sess == 1 and self.block == 0) or (self.sess in (2, 3) and self.block == 1):
+                self.create_frown_trial().run()  # frowning phase (first scanner round of each day)
+
+            if self.sess == 1 and self.block == 0:
+                # US habituation block (session 1, block 0)
+                for trial in us_trials:
+                    trial.run()
+            else:
+                for trial in self.trials:
+                    trial.run()
+
         # present second dummy trial for MRI synchronization, to be removed in data processing
         dummy_trials[1].run()
 
